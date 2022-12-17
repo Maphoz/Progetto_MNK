@@ -1,0 +1,170 @@
+LINK (da leggere):
+https://ieee-cog.org/2019/papers/paper_115.pdf (paper from wikipedia)
+https://en.wikipedia.org/wiki/M,n,k-game
+http://fragrieu.free.fr/SearchingForSolutions.pdf (Victor Allis) (tesi 200 pagine pnsearch, dbsearch)
+Transpositions
+http://ggp.stanford.edu/readings/symmetry.pdf
+
+MINIMAX:
+	- cambiare Board con nostra struttura (perché modifica le sue MC e FC con markCell() in modo non efficiente; in particolare non sono efficienti FC.toArray(lineare), e FC.remove (logaritmico))
+
+
+-	se avversario ha mossa vincente (tipo se ha due mosse vincenti e quindi non puoi bloccargliele entrambe):
+	può convenire ignorarlo e cercare di fare un tuo allineamento, sperando che lui sbagli (magari è implementato in modo che se tu stai per vincere non ti fa vincere);
+	oppure bloccargliene una (sperando che si perda l'altra)
+-	se una mossa è obbligata, si possono memorizzare due mosse insieme (dei due giocatori);
+	inoltre, alcune mosse magari non ha senso analizzarle o memorizzarle (se portano a stati finiti);
+	infine, a sto punto, si può non inizializzare subito la hash table di trasposizione, ma farlo per le configurazioni volute di volta in volta
+-	DAG transposition
+
+-	transposition table: salvare solo parte di hash key per ogni entry ? (eventualmente (chess-wikipedia) parte non usata come indice, o anche meno)
+
+
+
+PROPRIETÀ:
+-	m,n,k WIN	⇒ m> || n> || k< : WIN
+-	m,n,k DRAW	⇒ m< || n< || k> : DRAW
+-	k>=9: DRAW (tecnica pair)
+-	k>=3 && m<k || n<k : DRAW (tecnica pair, perpenidicolari a dimensione minore
+
+CASI:
+-	k = 1 and k = 2 are trivial wins, except for (1,1,2) and (2,1,2)
+-	(m,n,3) DRAW if m < 3 or n < 3.
+-	3 3 3 DRAW
+-	(m,n,3) WIN if m>3 || n>3
+-	4 3 3 WIN
+-	4 4 3 WIN
+-	4 4 4 DRAW
+-	5 4 4 DRAW
+-	(m,n,4) DRAW for m ≤ 5 and n ≤ 5
+-	5 5 4 DRAW
+-	5 5 5 DRAW
+-	6 4 4 DRAW
+-	6 5 4 WIN
+-	(m,n,4) is a win for m ≥ 6 and n ≥ 5 or m ≥ 5 and n ≥ 6.
+-	6 6 4 WIN
+-	6 6 5 DRAW
+-	6 6 6 DRAW
+-	7 4 4 DRAW
+-	7 5 4 WIN
+-	7 6 4 WIN
+-	7 7 4 WIN
+-	7 5 5 DRAW
+-	7 6 5 DRAW
+-	(m,n,5) DRAW for m ≤ 8 and n ≤ 8
+-	7 7 5 DRAW (Computer search by Wei-Yuan Hsu and Chu-Ling Ko)
+-	(7,7,6) DRAW (pairings)
+-	7 7 7 ?
+-	(m,4,4) DRAW for m ≤ 8
+-	8 8 4 WIN
+-	8 8 5 DRAW (Computer search by Wei-Yuan Hsu and Chu-Ling Ko)
+-	(m,4,4) for 9 ≤ m ≤ 29 : ?
+-	(9,6,6) DRAW (pairings)
+-	10 10 5 ?
+-	(15,15,5) WIN, (Computer search by L. Victor Allis) (even with one of the restrictive rules of Gomoku)
+-	(m,4,4) WIN for m ≥ 30 (Lustenberger, 1967)
+-	50 50 10 ?
+-	70 70 10 ?
+
+
+RISULTATI:
+(format: {k:m,n, ...})
+//m,n o n,m : indifferente
+min_win = {3:3,4, 4:6,5}
+-	k ∈ [3,4], m>=k, n>=4	: (WIN)
+							FIRST	: conisidera min_win[k] (es. Nord-Ovest)
+
+
+STRATEGIE:
+-	5,6,4:
+	______
+	______
+	__x___
+	______
+	______
+	.
+	______
+	______
+	_ox___
+	______
+	______
+	.
+	______
+	_x____
+	_ox___
+	______
+	______
+	.
+	______
+	_x____
+	_ox___
+	___o__
+	______
+	.
+	______
+	_xx___
+	_ox___
+	___o__
+	______
+	.
+	______
+	_o____
+	__x___
+	______
+	______
+	.
+	______
+	_ox___
+	__x___
+	______
+	______
+	.
+	______
+	_ox___
+	__x___
+	__o___
+	______
+	.
+	______
+	_oxx__
+	__x___
+	__o___
+	______
+	
+-	3,4,3
+	____
+	_x__
+	____
+	.
+	__o_
+	_x__
+	____
+	.
+	__o_
+	_xx_
+	____
+	.
+	____
+	_xo_
+	____
+	.
+	____
+	_xo_
+	__x_
+	.
+	o___
+	_xo_
+	__x_
+	.
+	o___
+	_xo_
+	_xx_
+	.
+
+-	k>=9 (pairs)
+	--/\--/\
+	\/||\/||
+	--||--||
+	 \--/\--
+	||\/||\/
+	||--||--

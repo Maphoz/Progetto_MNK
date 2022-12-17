@@ -1,0 +1,7 @@
+javac -d out -sourcepath src src/mnkgame/*.java
+javac -d out -sourcepath src src/player/*.java
+javac -d out -sourcepath src src/player/it_deepening/*.java
+javac -d out -sourcepath src src/player/minimax/*.java
+javac -d out -sourcepath src src/player/pnsearch/*.java
+javac -d out -sourcepath src src/player/pnsearch/structures/*.java
+javac -d out -sourcepath src src/player/structures/*.java
