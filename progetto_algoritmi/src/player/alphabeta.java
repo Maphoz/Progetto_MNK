@@ -2,28 +2,38 @@ package player;
 
 import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
+import mnkgame.MNKGameState;	
 
 public class alphabeta{
+	MNKGameState wCond;
+	MNKGameState lCond;
 	
-	public int alphaBeta(MNKBoard board, boolean maximizer) {
-		
-		if (maximizer) {
-			return max(board, Integer.MIN_VALUE, Integer.MAX_VALUE, 2);
+	public alphabeta(boolean first) {
+		if (first) {
+			wCond = MNKGameState.WINP1;
+			lCond = MNKGameState.WINP2;
 		}
-		else
-			return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, 2);
+		else {
+			wCond = MNKGameState.WINP2;
+			lCond = MNKGameState.WINP1;
+		}
 	}
 	
-	protected int max(MNKBoard board, int alpha, int beta, int depth) {
-		//if (depth == 0)
-		//		return evaluation(board);
+	public int alphaBeta(MNKBoard board, boolean maximizer) {
+		return max(board, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	}
+	
+	protected int max(MNKBoard board, int alpha, int beta) {
+		if  (board.gameState() == MNKGameState.DRAW)
+				return 0;
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
 		
 		int maxValue = Integer.MIN_VALUE;
 		while (k < FC.length) {
-			board.markCell(FC[k].i, FC[k].j);
-			int value = min(board, alpha, beta, depth - 1);
+			if (board.markCell(FC[k].i, FC[k].j) == wCond)
+				return 1;
+			int value = min(board, alpha, beta);
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
 			board.unmarkCell();
@@ -32,16 +42,17 @@ public class alphabeta{
 		return maxValue;
 	}
 	
-	protected int min(MNKBoard board, int alpha, int beta, int depth) {
-		//if (depth == 0)
-		//		return evaluation(board);
+	protected int min(MNKBoard board, int alpha, int beta) {
+		if  (board.gameState() == MNKGameState.DRAW)
+			return 0;
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
 				
 		int minValue = Integer.MAX_VALUE;
 		while (k < FC.length) {
-			board.markCell(FC[k].i, FC[k].j);
-			int value = max(board, alpha, beta, depth - 1);
+			if (board.markCell(FC[k].i, FC[k].j) == lCond)
+				return -1;
+			int value = max(board, alpha, beta);
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
 			board.unmarkCell();
