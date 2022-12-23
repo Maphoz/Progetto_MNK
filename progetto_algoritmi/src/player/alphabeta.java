@@ -20,26 +20,33 @@ public class alphabeta{
 	}
 	
 	public int alphaBeta(MNKBoard board, boolean maximizer) {
-		return max(board, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	protected int max(MNKBoard board, int alpha, int beta) {
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
-		
+		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
 		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == wCond) {
+			System.out.println("sono max e marco" + FC[k].i + FC[k].j);
+			state = board.markCell(FC[k].i, FC[k].j);
+			System.out.println("sono max e controllo se ho vinto" + (state == wCond));
+			if (state == wCond) {
+				System.out.println("sono max e smarco" + FC[k].i + FC[k].j);
 				board.unmarkCell();
 				return 1;
 			}
-			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+			else if (state == MNKGameState.DRAW) {
+				System.out.println("sono max e smarco" + FC[k].i + FC[k].j);
 				board.unmarkCell();
 				return 0;
 			}
+			System.out.println("sono sempre max e richiamo min");
 			int value = min(board, alpha, beta);
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
+			System.out.println("sono max e smarco" + FC[k].i + FC[k].j);
 			board.unmarkCell();
 			if (alpha >= beta) break;
 		}
@@ -47,22 +54,30 @@ public class alphabeta{
 	}
 	
 	protected int min(MNKBoard board, int alpha, int beta) {
+
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
-				
+		MNKGameState state;
 		int minValue = Integer.MAX_VALUE;
 		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == lCond) {
+			System.out.println("sono min e marco" + FC[k].i + FC[k].j);
+			state = board.markCell(FC[k].i, FC[k].j);
+			System.out.println("sono min e controllo se ho vinto" + (state == lCond));
+			if (state == lCond) {
 				board.unmarkCell();
+				System.out.println("sono min e smarco" + FC[k].i + FC[k].j);
 				return -1;
 			}
-			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+			else if (state == MNKGameState.DRAW) {
+				System.out.println("sono min e smarco" + FC[k].i + FC[k].j);
 				board.unmarkCell();
 				return 0;
 			}
+			System.out.println("sono sempre min e richiamo min");
 			int value = max(board, alpha, beta);
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
+			System.out.println("sono min e smarco" + FC[k].i + FC[k].j);
 			board.unmarkCell();
 			if (alpha >= beta) break;
 				}

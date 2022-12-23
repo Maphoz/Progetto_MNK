@@ -29,6 +29,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
+		
 		long startTime = cal.getTimeInMillis();
 		long currentTime = startTime;
 		//adding to my board representation the last move played by the adversary
@@ -43,6 +44,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		double best_value = Double.NEGATIVE_INFINITY;
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {						//add time control
+			System.out.println("sono player e sto provando" + FC[k].i + FC[k].j);
 			if (myBoard.markCell(FC[k].i, FC[k].j) == winningCondition)
 				return FC[k];
 			value = solver.alphaBeta(myBoard, true);
@@ -50,10 +52,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 				best_value = value;
 				selected_move = FC[k];
 			}
+			System.out.println("sono player e smarco" + FC[k].i + FC[k].j);
 			myBoard.unmarkCell();
 		    k++;
 		    //update time
 		}
+		System.out.println("sono player e marco definitivamente" + FC[k].i + FC[k].j);
 		myBoard.markCell(FC[k].i, FC[k].j);
 		return selected_move;
 	}
