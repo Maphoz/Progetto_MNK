@@ -24,8 +24,6 @@ public class alphabeta{
 	}
 	
 	protected int max(MNKBoard board, int alpha, int beta) {
-		if  (board.gameState() == MNKGameState.DRAW)
-				return 0;
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
 		
@@ -34,6 +32,10 @@ public class alphabeta{
 			if (board.markCell(FC[k].i, FC[k].j) == wCond) {
 				board.unmarkCell();
 				return 1;
+			}
+			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+				board.unmarkCell();
+				return 0;
 			}
 			int value = min(board, alpha, beta);
 			maxValue = Math.max(value, maxValue);
@@ -45,8 +47,6 @@ public class alphabeta{
 	}
 	
 	protected int min(MNKBoard board, int alpha, int beta) {
-		if  (board.gameState() == MNKGameState.DRAW)
-			return 0;
 		MNKCell[] FC = board.getFreeCells();
 		int k = 0;
 				
@@ -55,6 +55,10 @@ public class alphabeta{
 			if (board.markCell(FC[k].i, FC[k].j) == lCond) {
 				board.unmarkCell();
 				return -1;
+			}
+			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+				board.unmarkCell();
+				return 0;
 			}
 			int value = max(board, alpha, beta);
 			minValue = Math.min(value, minValue);
