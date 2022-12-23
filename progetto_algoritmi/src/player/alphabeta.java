@@ -54,7 +54,7 @@ public class alphabeta{
 		while (k < FC.length) {
 			if (board.markCell(FC[k].i, FC[k].j) == lCond) {
 				board.unmarkCell();
-				return 1;
+				return -1;
 			}
 			int value = max(board, alpha, beta);
 			minValue = Math.min(value, minValue);

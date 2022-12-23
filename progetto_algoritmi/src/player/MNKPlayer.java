@@ -39,7 +39,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		//selecting my move
 		MNKCell selected_move = FC[0];
-		/*int k = 0;
+		int k = 0;
 		double best_value = Double.NEGATIVE_INFINITY;
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {						//add time control
@@ -54,7 +54,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		    k++;
 		    //update time
 		}
-		*/
+		myBoard.markCell(FC[k].i, FC[k].j);
 		return selected_move;
 	}
 
