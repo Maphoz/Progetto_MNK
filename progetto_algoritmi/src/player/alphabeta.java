@@ -31,8 +31,10 @@ public class alphabeta{
 		
 		int maxValue = Integer.MIN_VALUE;
 		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == wCond)
+			if (board.markCell(FC[k].i, FC[k].j) == wCond) {
+				board.unmarkCell();
 				return 1;
+			}
 			int value = min(board, alpha, beta);
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
@@ -50,8 +52,10 @@ public class alphabeta{
 				
 		int minValue = Integer.MAX_VALUE;
 		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == lCond)
-				return -1;
+			if (board.markCell(FC[k].i, FC[k].j) == lCond) {
+				board.unmarkCell();
+				return 1;
+			}
 			int value = max(board, alpha, beta);
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
