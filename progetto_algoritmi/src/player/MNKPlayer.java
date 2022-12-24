@@ -2,9 +2,11 @@ package player;
 
 import java.util.*;
 
+
 import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
+import mnkgame.Random;
 
 public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKBoard myBoard;
@@ -14,6 +16,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	int timeout;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
+		int rand    = new Random(System.currentTimeMillis()); 
 		myBoard = new MNKBoard (M, N, K);
 		
 		//saving the timeout in milliseconds

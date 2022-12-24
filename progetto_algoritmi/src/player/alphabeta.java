@@ -1,6 +1,7 @@
 package player;
 
 import mnkgame.MNKBoard;
+
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;	
 
