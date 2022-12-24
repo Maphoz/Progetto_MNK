@@ -21,6 +21,7 @@ public class alphabeta{
 	}
 	
 	protected int max(MNKBoard board, int alpha, int beta) {
+		
 		MNKCell[] FC = board.getFreeCells();
 		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
@@ -44,7 +45,6 @@ public class alphabeta{
 	}
 	
 	protected int min(MNKBoard board, int alpha, int beta) {
-
 		MNKCell[] FC = board.getFreeCells();
 		MNKGameState state;
 		int minValue = Integer.MAX_VALUE;

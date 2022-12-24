@@ -2,11 +2,9 @@ package player;
 
 import java.util.*;
 
-
 import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
-import mnkgame.Random;
 
 public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKBoard myBoard;
@@ -14,9 +12,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKGameState losCondition;
 	alphabeta solver;
 	int timeout;
+	boolean FirstTurn;
+	Random rand;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
-		int rand    = new Random(System.currentTimeMillis()); 
+		rand = new Random(System.currentTimeMillis()); 
+		FirstTurn=true;
 		myBoard = new MNKBoard (M, N, K);
 		
 		//saving the timeout in milliseconds
@@ -45,6 +46,14 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
 		}
 		
+		if(FirstTurn) {
+			MNKCell selected_move = FC[rand.nextInt(FC.length)];
+			myBoard.markCell(selected_move.i,selected_move.j);
+			int value;
+			value = solver.alphaBeta(myBoard, true);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			FirstTurn = false;
+			return selected_move;
+		}
 		//checking if there are any winning moves
 		for (int k = 0; k < FC.length; k++) {
 			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
