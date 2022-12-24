@@ -8,53 +8,65 @@ import mnkgame.MNKGameState;
 
 public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKBoard myBoard;
-	MNKGameState winningCondition;
+	MNKGameState winCondition;
+	MNKGameState losCondition;
 	alphabeta solver;
 	int timeout;
-	boolean first;
-	Calendar cal;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		myBoard = new MNKBoard (M, N, K);
 		
-		this.first = first;
+		//saving the timeout in milliseconds
 		this.timeout = timeout_in_secs*1000;
 		
-		if (first)
-			winningCondition = MNKGameState.WINP1;
-		else
-			winningCondition = MNKGameState.WINP2;
-		cal = Calendar.getInstance();
-		solver = new alphabeta(first);
+		//identifying the win conditions for me and my opponent
+		if (first) {
+			winCondition = MNKGameState.WINP1;
+			losCondition = MNKGameState.WINP2;
+		}
+		else {
+			winCondition = MNKGameState.WINP2;
+			losCondition = MNKGameState.WINP1;
+		}
+		//instance of the alphabeta class to solve the problem
+		solver = new alphabeta(winCondition, losCondition);
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
-		long startTime = cal.getTimeInMillis();
+		//starting the time count
+		long startTime = System.currentTimeMillis();
 		long currentTime = startTime;
-		//adding to my board representation the last move played by the adversary
 		
+		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
+		}
+		
+		//checking if there are any winning moves
+		for (int k = 0; k < FC.length; k++) {
+			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
+				return FC[k];
+			else
+				myBoard.unmarkCell();
 		}
 		
 		//selecting my move
 		MNKCell selected_move = FC[0];
 		int k = 0;
-		double best_value = Double.NEGATIVE_INFINITY;
+		double best_value = Double.NEGATIVE_INFINITY;			// we are always the maximizing player in this implementation
 		int value;
-		while (k < FC.length && currentTime < startTime + timeout - 200) {						//add time control
-			if (myBoard.markCell(FC[k].i, FC[k].j) == winningCondition)
-				return FC[k];
-			value = solver.alphaBeta(myBoard, true);
-			if (value > best_value) {
+		while (k < FC.length && currentTime < startTime + timeout - 200) {						
+			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
+			value = solver.alphaBeta(myBoard, true);			//launch the alphabeta tree
+			if (value > best_value) {							//if the move tried is better than the previous best one, swap
 				best_value = value;
 				selected_move = FC[k];
 			}
-			myBoard.unmarkCell();
+			myBoard.unmarkCell();								//remove the cell and iterate again
 		    k++;
-		    //update time
+		    currentTime = System.currentTimeMillis();
 		}
-		myBoard.markCell(FC[k].i, FC[k].j);
+		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell found
 		return selected_move;
 	}
 

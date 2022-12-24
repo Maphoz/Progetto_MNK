@@ -8,36 +8,32 @@ public class alphabeta{
 	MNKGameState wCond;
 	MNKGameState lCond;
 	
-	public alphabeta(boolean first) {
-		if (first) {
-			wCond = MNKGameState.WINP1;
-			lCond = MNKGameState.WINP2;
-		}
-		else {
-			wCond = MNKGameState.WINP2;
-			lCond = MNKGameState.WINP1;
-		}
+	public alphabeta(MNKGameState wc, MNKGameState lc) {
+		//saving the win conditions
+		wCond = wc;
+		lCond = lc;
 	}
 	
 	public int alphaBeta(MNKBoard board, boolean maximizer) {
-		return max(board, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		//the move is being tried by the player class, so we look for opponent best response
+		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 	
 	protected int max(MNKBoard board, int alpha, int beta) {
 		MNKCell[] FC = board.getFreeCells();
-		int k = 0;
-		
+		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
-		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == wCond) {
+		for (MNKCell d: FC) {
+			state = board.markCell(d.i, d.j);				
+			if (state == wCond) {							//if it is a winning cell, return the best evaluation
 				board.unmarkCell();
 				return 1;
 			}
-			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+			if (state == MNKGameState.DRAW) {				//if it is a drawing cell, return the null evaluation
 				board.unmarkCell();
 				return 0;
 			}
-			int value = min(board, alpha, beta);
+			int value = min(board, alpha, beta);			//else recursive call and compare the evaluations
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
 			board.unmarkCell();
@@ -47,16 +43,17 @@ public class alphabeta{
 	}
 	
 	protected int min(MNKBoard board, int alpha, int beta) {
+
 		MNKCell[] FC = board.getFreeCells();
-		int k = 0;
-				
+		MNKGameState state;
 		int minValue = Integer.MAX_VALUE;
-		while (k < FC.length) {
-			if (board.markCell(FC[k].i, FC[k].j) == lCond) {
+		for (MNKCell d: FC) {
+			state = board.markCell(d.i, d.j);
+			if (state == lCond) {
 				board.unmarkCell();
 				return -1;
 			}
-			if (board.markCell(FC[k].i, FC[k].j) == MNKGameState.DRAW) {
+			if (state == MNKGameState.DRAW) {
 				board.unmarkCell();
 				return 0;
 			}
@@ -65,7 +62,7 @@ public class alphabeta{
 			beta = Math.min(beta, minValue);
 			board.unmarkCell();
 			if (alpha >= beta) break;
-				}
+		}
 		return minValue;
 	}
 
