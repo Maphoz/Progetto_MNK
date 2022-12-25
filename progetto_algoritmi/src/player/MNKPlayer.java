@@ -6,6 +6,7 @@ import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
 
+
 public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKBoard myBoard;
 	MNKGameState winCondition;
@@ -16,6 +17,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	Random rand;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
+		
 		rand = new Random(System.currentTimeMillis()); 
 		FirstTurn=true;
 		myBoard = new MNKBoard (M, N, K);
@@ -50,7 +52,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
 			int value;
-			value = solver.alphaBeta(myBoard, true);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			value = solver.alphaBeta(myBoard, true, 200);			//fai un alpha beta con una depth più grande perchè hai più tempo
 			FirstTurn = false;
 			return selected_move;
 		}
@@ -69,7 +71,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {						
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
-			value = solver.alphaBeta(myBoard, true);			//launch the alphabeta tree
+			value = solver.alphaBeta(myBoard, true, 200);			//launch the alphabeta tree
 			if (value > best_value) {							//if the move tried is better than the previous best one, swap
 				best_value = value;
 				selected_move = FC[k];
