@@ -51,16 +51,19 @@ public class alphabeta{
 			alpha = Math.max(alpha, maxValue);
 			board.unmarkCell();
 			if (alpha >= beta) { 
-				if(!killer.is_a_KM(d, distance_from_root) && killer.deep_enough(distance_from_root)) {
+				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root) ) {
+					//System.out.println("inserisco");
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
 				}
-				else if(killer.deep_enough(distance_from_root)) {
+				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
+					//System.out.println("cambio weight in max");
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
 				break;
 			}
 			else {
-				if(killer.is_a_KM(d, distance_from_root) && killer.deep_enough(distance_from_root)) {
+				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
+					//System.out.println("diminuisco");
 					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
 				}
 				
@@ -94,15 +97,19 @@ public class alphabeta{
 			beta = Math.min(beta, minValue);
 			board.unmarkCell();
 			if (alpha >= beta) { 
-				if(!killer.is_a_KM(d, distance_from_root) && killer.deep_enough(distance_from_root)) {
+				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root)) {
+					//System.out.println("inserisco");
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
 				}
-				else if(killer.deep_enough(distance_from_root))
-					killer.change_weight(d, - 1, distance_from_root);      //mpssa buona 
+				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
+					//System.out.println("cambio weight in max");
+					killer.change_weight(d, - 1, distance_from_root);      //mpssa buona
+				}
 				break;
 			}
 			else {
-				if(killer.is_a_KM(d, distance_from_root) && killer.deep_enough(distance_from_root)) {
+				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
+					//System.out.println("diminuisco");
 					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
 				}
 			}
