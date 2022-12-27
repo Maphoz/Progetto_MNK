@@ -4,3 +4,8 @@
 /killer_heuristic$Killer_cell.class
 /killer_heuristic$killer_cell.class
 /main$that.class
+/MNKPlayer.class
+/Transposition_table$transposition_hash_cell.class
+/Transposition_table.class
+/alphabeta.class
+/main.class
