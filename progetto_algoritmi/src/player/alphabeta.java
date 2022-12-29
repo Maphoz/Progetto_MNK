@@ -93,7 +93,7 @@ public class alphabeta{
 					return score;  
 				}
 			}
-			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1);			//else recursive call and compare the evaluations
+			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1, eval);			//else recursive call and compare the evaluations
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
 			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
@@ -175,7 +175,7 @@ public class alphabeta{
 					return score;  
 				}
 			}
-			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1);
+			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1, eval);
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
 			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
