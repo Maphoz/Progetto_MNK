@@ -18,15 +18,13 @@ public class Transposition_table {
 	protected final int ScoreNotFound;
 	protected final int max_ite;
 	protected final int max_ispezione;
-	protected boolean table_is_full;
 	protected int M;
 	protected int N;
 	protected long[][][] storage;//deve essere una matrice tridimensionale
 	protected transposition_hash_cell[] transposition_hash;    //l'hash table è 2^16, da inizializzare con tutti i campi val a -2 o comunque un valore per far capire che quella cella è vuota
 
 	public Transposition_table(int M, int N){
-		table_is_full=false;
-		hash_size = (int)Math.pow(2,8);  //dimensione della tabella hash 
+		hash_size = (int)Math.pow(2,9);  //dimensione della tabella hash 
 		max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
 		max_ispezione = 60;
 		ScoreNotFound = -10; //indica se quando Osama controlla se è presente nella transposition_hash lo stesso Game_state, non lo trova

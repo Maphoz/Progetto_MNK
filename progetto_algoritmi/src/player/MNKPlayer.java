@@ -2,6 +2,7 @@ package player;
 
 import java.util.*;
 
+
 import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
@@ -16,6 +17,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	boolean FirstTurn;
 	Random rand;
 	Transposition_table TT;
+	killer_heuristic killer;
 	int distance_from_root;
 	long key;
 
@@ -23,6 +25,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		this.key = (long)0;
 		distance_from_root = 0;
 		this.TT = new Transposition_table(M,N);
+		this.killer = new killer_heuristic(M,N, K);
 		TT.initTableRandom();
 		rand = new Random(System.currentTimeMillis()); 
 		FirstTurn=true;
@@ -45,7 +48,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
-		distance_from_root++;
+		
 		//starting the time count
 		long startTime = System.currentTimeMillis();
 		long currentTime = startTime;
@@ -60,10 +63,13 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-			int value = solver.alphaBeta(myBoard, true, 10, TT, distance_from_root, key);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;
 			return selected_move;
 		}
+		
+		distance_from_root++;
 		//checking if there are any winning moves
 		for (int k = 0; k < FC.length; k++) {
 			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
@@ -74,13 +80,19 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		//selecting my move
 		MNKCell selected_move = FC[0];
+		int size = FC.length;
+		if(killer.deep_enough(distance_from_root)) {
+			killer.move_ordering(FC, size, distance_from_root);
+		}
+			
 		int k = 0;
 		double best_value = Double.NEGATIVE_INFINITY;			// we are always the maximizing player in this implementation
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {	
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
 			key = TT.generate_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
-			value = solver.alphaBeta(myBoard, true, 3, TT, distance_from_root, key);			//launch the alphabeta tree
+			value = solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);		
+			//value = -solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);			implementazione con NegaScout
 			if (value > best_value) {							//if the move tried is better than the previous best one, swap
 				best_value = value;
 				selected_move = FC[k];
