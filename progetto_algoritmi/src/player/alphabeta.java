@@ -20,30 +20,20 @@ public class alphabeta{
 		lCond = lc;
 	}
 	
-<<<<<<< HEAD
-	public int alphaBeta(MNKBoard board, EvaluationTool eval) {
-=======
-	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key) {
+	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
 		this.key = key;
 		this.TT = TT;
 		this.killer = killer;
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
+
 		//the move is being tried by the player class, so we look for opponent best response
-<<<<<<< HEAD
-		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, eval);
-=======
-		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root);
+		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root, eval);
 		//return NegaScoutmax(board, Integer.MAX_VALUE, Integer.MIN_VALUE, depth, distance_from_root, false);
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
+
 	}
-<<<<<<< HEAD
-	
-	protected int max(MNKBoard board, int alpha, int beta, EvaluationTool eval) {
-=======
 	//---------
 	//ALPHABETA CON TT E KILLER
-	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
+	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
+
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
@@ -119,7 +109,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
@@ -128,7 +118,7 @@ public class alphabeta{
 	}
 	
 	
-	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
+	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
@@ -201,7 +191,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
@@ -263,7 +253,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
@@ -327,7 +317,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 			}
 >>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
@@ -429,7 +419,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 			}
 			b = alpha + 1;       //metti una nuova finestra null
