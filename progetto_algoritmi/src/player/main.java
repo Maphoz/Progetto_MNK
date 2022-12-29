@@ -9,7 +9,7 @@ import player.killer_heuristic.killer_cell;
 public class main {
 
 	public static void main(String[] args) {
-		killer_heuristic killer = new killer_heuristic();
+	
 		/*//System.out.println(k.killerMoves[3].size());
 		MNKCell c = new MNKCell(1, 1);
 		MNKCell d = new MNKCell(0, 0);
