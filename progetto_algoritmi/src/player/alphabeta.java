@@ -20,17 +20,20 @@ public class alphabeta{
 		lCond = lc;
 	}
 	
-	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key) {
+	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
 		this.key = key;
 		this.TT = TT;
 		this.killer = killer;
+
 		//the move is being tried by the player class, so we look for opponent best response
-		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root);
+		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root, eval);
 		//return NegaScoutmax(board, Integer.MAX_VALUE, Integer.MIN_VALUE, depth, distance_from_root, false);
+
 	}
 	//---------
 	//ALPHABETA CON TT E KILLER
-	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
+	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
+
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
@@ -106,7 +109,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
@@ -115,7 +118,7 @@ public class alphabeta{
 	}
 	
 	
-	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
+	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
@@ -188,7 +191,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
@@ -207,23 +210,38 @@ public class alphabeta{
 		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
 		for (MNKCell d: FC) {
+<<<<<<< HEAD
+			state = board.markCell(d.i, d.j);
+			eval.addSymbol(d.i, d.j, true);
+=======
 			state = board.markCell(d.i, d.j);	
 			if(depth==0) {
 				board.unmarkCell();
 				return 0;   //da mettere qua l'evaluation
 			}
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			if (state == wCond) {							//if it is a winning cell, return the best evaluation
 				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, true);
 				return 1;
 			}
 			if (state == MNKGameState.DRAW) {				//if it is a drawing cell, return the null evaluation
 				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, true);
 				return 0;
 			}
+<<<<<<< HEAD
+			int value = min(board, alpha, beta, eval);			//else recursive call and compare the evaluations
+=======
 			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1);			//else recursive call and compare the evaluations
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
 			board.unmarkCell();
+<<<<<<< HEAD
+			eval.removeSymbol(d.i, d.j, true);
+			if (alpha >= beta) break;
+=======
 			if (alpha >= beta) { 
 				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root) ) {
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
@@ -235,16 +253,21 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 				
 			}
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		}
 		return maxValue;
 	}
 	
+<<<<<<< HEAD
+	protected int min(MNKBoard board, int alpha, int beta, EvaluationTool eval) {
+=======
 	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
 
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		MNKCell[] FC = board.getFreeCells();
 		int size = FC.length;
 		if(killer.deep_enough(distance_from_root))
@@ -253,22 +276,36 @@ public class alphabeta{
 		int minValue = Integer.MAX_VALUE;
 		for (MNKCell d: FC) {
 			state = board.markCell(d.i, d.j);
+<<<<<<< HEAD
+			eval.addSymbol(d.i, d.j, false);
+=======
 			if(depth==0) {
 				board.unmarkCell();
 				return 0;   //da mettere qua l'evaluation
 			}
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			if (state == lCond) {
 				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, false);
 				return -1;
 			}
 			if (state == MNKGameState.DRAW) {
 				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, false);
 				return 0;
 			}
+<<<<<<< HEAD
+			int value = max(board, alpha, beta, eval);
+=======
 			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1);
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
 			board.unmarkCell();
+<<<<<<< HEAD
+			eval.removeSymbol(d.i, d.j, false);
+			if (alpha >= beta) break;
+=======
 			if (alpha >= beta) { 
 				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root)) {
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
@@ -280,9 +317,10 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 			}
+>>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		}
 		return minValue;
 	}
@@ -381,7 +419,7 @@ public class alphabeta{
 			}
 			else {
 				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchË non ha fatto cut off quindi abbassiamo la priorit‡
+					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perch√® non ha fatto cut off quindi abbassiamo la priorit√†
 				}
 			}
 			b = alpha + 1;       //metti una nuova finestra null

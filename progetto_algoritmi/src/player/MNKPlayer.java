@@ -16,6 +16,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	int timeout;
 	boolean FirstTurn;
 	Random rand;
+	EvaluationTool eval;
 	Transposition_table TT;
 	killer_heuristic killer;
 	int distance_from_root;
@@ -45,6 +46,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		}
 		//instance of the alphabeta class to solve the problem
 		solver = new alphabeta(winCondition, losCondition);
+		eval = new EvaluationTool(M, N, K, first);
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
@@ -56,14 +58,17 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
+			eval.addSymbol(MC[MC.length - 1].i, MC[MC.length - 1].j, false);
 			key = TT.generate_key(key, MC[MC.length - 1].i, MC[MC.length - 1].j, MC[MC.length - 1].state);
 		}
 		
 		if(FirstTurn) {
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
+			eval.addSymbol(selected_move.i,selected_move.j, true);
+			int value = solver.alphaBeta(myBoard, eval);			//fai un alpha beta con una depth piï¿½ grande perchï¿½ hai piï¿½ tempo
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);			//fai un alpha beta con una depth pi� grande perch� hai pi� tempo
+			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);			//fai un alpha beta con una depth più grande perchè hai più tempo
 			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;
 			return selected_move;
@@ -90,6 +95,8 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {	
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
+			eval.addSymbol(FC[k].i, FC[k].j, true);
+			value = solver.alphaBeta(myBoard, eval);			//launch the alphabeta tree
 			key = TT.generate_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
 			value = solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);		
 			//value = -solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);			implementazione con NegaScout
@@ -99,10 +106,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			}
 			key = TT.undo_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
 			myBoard.unmarkCell();								//remove the cell and iterate again
-		    k++;
+		    eval.removeSymbol(FC[k].i, FC[k].j, true);
+			k++;
 		    currentTime = System.currentTimeMillis();
 		}
-		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell found
+		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell foundÃ¹
+		eval.addSymbol(selected_move.i,selected_move.j, true);
 		key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
 		return selected_move;
 	}
