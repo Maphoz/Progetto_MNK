@@ -14,6 +14,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	int timeout;
 	boolean FirstTurn;
 	Random rand;
+	EvaluationTool eval;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		rand = new Random(System.currentTimeMillis()); 
@@ -34,6 +35,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		}
 		//instance of the alphabeta class to solve the problem
 		solver = new alphabeta(winCondition, losCondition);
+		eval = new EvaluationTool(M, N, K, first);
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
@@ -44,13 +46,14 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
+			eval.addSymbol(MC[MC.length - 1].i, MC[MC.length - 1].j, false);
 		}
 		
 		if(FirstTurn) {
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
-			int value;
-			value = solver.alphaBeta(myBoard, true);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			eval.addSymbol(selected_move.i,selected_move.j, true);
+			int value = solver.alphaBeta(myBoard, eval);			//fai un alpha beta con una depth piï¿½ grande perchï¿½ hai piï¿½ tempo
 			FirstTurn = false;
 			return selected_move;
 		}
@@ -69,16 +72,19 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {						
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
-			value = solver.alphaBeta(myBoard, true);			//launch the alphabeta tree
+			eval.addSymbol(FC[k].i, FC[k].j, true);
+			value = solver.alphaBeta(myBoard, eval);			//launch the alphabeta tree
 			if (value > best_value) {							//if the move tried is better than the previous best one, swap
 				best_value = value;
 				selected_move = FC[k];
 			}
 			myBoard.unmarkCell();								//remove the cell and iterate again
-		    k++;
+		    eval.removeSymbol(FC[k].i, FC[k].j, true);
+			k++;
 		    currentTime = System.currentTimeMillis();
 		}
-		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell found
+		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell foundÃ¹
+		eval.addSymbol(selected_move.i,selected_move.j, true);
 		return selected_move;
 	}
 
