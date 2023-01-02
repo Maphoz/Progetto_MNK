@@ -14,8 +14,8 @@ public class EvaluationTool {
 	int myThreats[];
 	int enemyThreats[];
 	
-	int MAX_EVALUATION = Integer.MAX_VALUE;				//if we win
-	int MIN_EVALUATION = Integer.MIN_VALUE;				//if enemy player win
+	public int MAX_EVALUATION = 200;				//if we win
+	public int MIN_EVALUATION = -200;				//if enemy player win
 	
 	//maps that store how many symbols there are in each row/column to evaluate a board
 	//saves time if n symbols < k-2

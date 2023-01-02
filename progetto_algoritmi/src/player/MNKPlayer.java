@@ -67,7 +67,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
+			int value = solver.alphaBeta(myBoard, true, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
 			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;
 			return selected_move;
@@ -96,7 +96,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
 			eval.addSymbol(FC[k].i, FC[k].j, true);
 			key = TT.generate_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
-			value = solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key, eval);		
+			value = solver.alphaBeta(myBoard, true, myBoard.M * myBoard.N - MC.length + 1, TT, killer, distance_from_root, key, eval);		
 			//value = -solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);			implementazione con NegaScout
 			if (value > best_value) {							//if the move tried is better than the previous best one, swap
 				best_value = value;
