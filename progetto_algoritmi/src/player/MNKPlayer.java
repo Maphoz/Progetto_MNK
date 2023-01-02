@@ -72,12 +72,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			eval.addSymbol(selected_move.i,selected_move.j, true);
 			
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-<<<<<<< HEAD
-			
-			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
-=======
 			int value = solver.alphaBeta(myBoard, true, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK
 			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;
 			return selected_move;
