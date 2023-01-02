@@ -23,6 +23,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	long key;
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
+		
 		this.key = (long)0;
 		distance_from_root = 0;
 		this.TT = new Transposition_table(M,N);
@@ -47,9 +48,11 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		//instance of the alphabeta class to solve the problem
 		solver = new alphabeta(winCondition, losCondition);
 		eval = new EvaluationTool(M, N, K, first);
+		
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
+		
 		
 		//starting the time count
 		long startTime = System.currentTimeMillis();
@@ -63,10 +66,13 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		}
 		
 		if(FirstTurn) {
+			
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
+			
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
+			
 			int value = solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
 			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;

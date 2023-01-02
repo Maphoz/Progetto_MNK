@@ -48,20 +48,21 @@ public class Transposition_table {
 		}
     }
 	public long generate_key(long father_key_hash, int x, int y, MNKCellState p){ //y colonne e x le righe, genera la chiave relativa a una cella, la radice ha father_key_hash=(long)0
+		
 		if(p == MNKCellState.P1){
-			father_key_hash ^= storage[0][y][x];
+			father_key_hash ^= storage[0][x][y];
 			}
 		if(p == MNKCellState.P2){
-			father_key_hash ^= storage[1][y][x];
+			father_key_hash ^= storage[1][x][y];
 			}	
 		return 	father_key_hash; //con un hash a 64 bit, le collisioni possono avvenire 1 ogni sqrt(2^64) cioè dopo circa 2^32 o 4 miliardi di posizioni calcolate
     }
 	public long undo_key(long node_key, int x, int y, MNKCellState p){ //y colonne e x le righe, genera la chiave relativa a una cella, 
 		if(p == MNKCellState.P1){
-			node_key ^= storage[0][y][x];
+			node_key ^= storage[0][x][y];
 			}
 		if(p == MNKCellState.P2){
-			node_key ^= storage[1][y][x];
+			node_key ^= storage[1][x][y];
 			}	
 		return 	node_key; //ritorna la chiave padre
     }
