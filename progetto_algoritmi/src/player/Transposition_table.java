@@ -21,13 +21,13 @@ public class Transposition_table {
 	protected int M;
 	protected int N;
 	protected long[][][] storage;//deve essere una matrice tridimensionale
-	protected transposition_hash_cell[] transposition_hash;    //l'hash table è 2^16, da inizializzare con tutti i campi val a -2 o comunque un valore per far capire che quella cella è vuota
+	protected transposition_hash_cell[] transposition_hash;    //l'hash table ï¿½ 2^16, da inizializzare con tutti i campi val a -2 o comunque un valore per far capire che quella cella ï¿½ vuota
 
 	public Transposition_table(int M, int N){
 		hash_size = (int)Math.pow(2,9);  //dimensione della tabella hash 
 		max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
 		max_ispezione = 60;
-		ScoreNotFound = -10; //indica se quando Osama controlla se è presente nella transposition_hash lo stesso Game_state, non lo trova
+		ScoreNotFound = -10; //indica se quando Osama controlla se ï¿½ presente nella transposition_hash lo stesso Game_state, non lo trova
 		transposition_hash = new transposition_hash_cell[hash_size];
 		for(int i=0; i<hash_size; i++){
 			transposition_hash_cell t = new transposition_hash_cell(-2, 0);
@@ -42,26 +42,26 @@ public class Transposition_table {
 		for(int i=0; i<2; i++){
 			for(int j=0; j<M; j++){
 				for(int k=0; k<N; k++){
-						storage[i][j][k]= new Random().nextLong();//il numero random in questo caso può essere pure negativo
+						storage[i][j][k]= new Random().nextLong();//il numero random in questo caso puï¿½ essere pure negativo
 				}
 			}
 		}
     }
 	public long generate_key(long father_key_hash, int x, int y, MNKCellState p){ //y colonne e x le righe, genera la chiave relativa a una cella, la radice ha father_key_hash=(long)0
 		if(p == MNKCellState.P1){
-			father_key_hash ^= storage[0][y][x];
+			father_key_hash ^= storage[0][x][y];
 			}
 		if(p == MNKCellState.P2){
-			father_key_hash ^= storage[1][y][x];
+			father_key_hash ^= storage[1][x][y];
 			}	
-		return 	father_key_hash; //con un hash a 64 bit, le collisioni possono avvenire 1 ogni sqrt(2^64) cioè dopo circa 2^32 o 4 miliardi di posizioni calcolate
+		return 	father_key_hash; //con un hash a 64 bit, le collisioni possono avvenire 1 ogni sqrt(2^64) cioï¿½ dopo circa 2^32 o 4 miliardi di posizioni calcolate
     }
 	public long undo_key(long node_key, int x, int y, MNKCellState p){ //y colonne e x le righe, genera la chiave relativa a una cella, 
 		if(p == MNKCellState.P1){
-			node_key ^= storage[0][y][x];
+			node_key ^= storage[0][x][y];
 			}
 		if(p == MNKCellState.P2){
-			node_key ^= storage[1][y][x];
+			node_key ^= storage[1][x][y];
 			}	
 		return 	node_key; //ritorna la chiave padre
     }
@@ -92,7 +92,7 @@ public class Transposition_table {
 		}
 	}
 
-	public int gain_score (long key){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non è stato trovato
+	public int gain_score (long key){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non ï¿½ stato trovato
 		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 		int i=0;
 		while(true){ 
@@ -107,7 +107,7 @@ public class Transposition_table {
 		}
 }
 
-	//Osama genera la chiave, controlla se è presente nella tabella tramite gain_score, se non c'è fa una evaluation e poi salva lo score con save_data
+	//Osama genera la chiave, controlla se ï¿½ presente nella tabella tramite gain_score, se non c'ï¿½ fa una evaluation e poi salva lo score con save_data
 	public void save_data(int score, long key){
 		int transposition_table_index = ispezione(key);
 		if(transposition_table_index==ScoreNotFound) {
