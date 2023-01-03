@@ -90,7 +90,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		}
 			
 		int k = 0;
-		double best_value = Double.NEGATIVE_INFINITY;			// we are always the maximizing player in this implementation
+		int best_value = Integer.MIN_VALUE;			// we are always the maximizing player in this implementation
 		int value;
 		while (k < FC.length && currentTime < startTime + timeout - 200) {	
 			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test

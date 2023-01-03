@@ -1,6 +1,7 @@
 package player;
 
 import mnkgame.MNKBoard;
+import java.util.*;
 
 
 import mnkgame.MNKCell;
@@ -20,7 +21,21 @@ public class alphabeta{
 		lCond = lc;
 	}
 	
-	//public int iterativeDeepening()
+	/*public int iterativeDeepening(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval, int timeout){
+		this.key = key;
+		this.TT = TT;
+		this.killer = killer;
+		long startTime = System.currentTimeMillis();
+		long currentTime = startTime;
+		int depth = 1;
+		int best_value = Integer.MIN_VALUE;
+		while (currentTime < startTime + timeout*1000) {
+			int value = max(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, 0, eval);
+			currentTime = System.currentTimeMillis();
+		}
+		}
+	*/
+	
 	
 	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
 		this.key = key;
