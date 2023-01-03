@@ -68,11 +68,11 @@ public class alphabeta{
 				int score = TT.gain_score(key);
 				
 				if(score==TT.ScoreNotFound) {
+					int evaluation = eval.evaluation(board, false);
+					TT.save_data(evaluation, key);
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 					board.unmarkCell();
 					eval.removeSymbol(d.i, d.j, true);
-					int evaluation = eval.evaluation(board, false);			//da mettere qua l'evaluation
-					TT.save_data(evaluation, key);
 					return evaluation;
 				}				
 				else {
@@ -161,11 +161,11 @@ public class alphabeta{
 			if(depth==0) {
 				int score = TT.gain_score(key);
 				if(score==TT.ScoreNotFound) {
+					int evaluation = eval.evaluation(board, true);
+					TT.save_data(evaluation, key);
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 					board.unmarkCell();
 					eval.removeSymbol(d.i, d.j, false);
-					int evaluation = eval.evaluation(board, true);
-					TT.save_data(evaluation, key);
 					return evaluation;
 				}				
 				else {
