@@ -51,12 +51,12 @@ public class alphabeta{
 				int score = TT.gain_score(key);
 				
 				if(score==TT.ScoreNotFound) {
-					int evaluation = 0;			//da mettere qua l'evaluation
-					TT.save_data(evaluation, key);
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 					board.unmarkCell();
 					eval.removeSymbol(d.i, d.j, true);
-					return eval.evaluation(board, false);
+					int evaluation = eval.evaluation(board, false);			//da mettere qua l'evaluation
+					TT.save_data(evaluation, key);
+					return evaluation;
 				}				
 				else {
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
@@ -144,12 +144,12 @@ public class alphabeta{
 			if(depth==0) {
 				int score = TT.gain_score(key);
 				if(score==TT.ScoreNotFound) {
-					int evaluation = 0;			//da mettere qua l'evaluation
-					TT.save_data(evaluation, key);
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 					board.unmarkCell();
 					eval.removeSymbol(d.i, d.j, false);
-					return eval.evaluation(board, true);
+					int evaluation = eval.evaluation(board, true);
+					TT.save_data(evaluation, key);
+					return evaluation;
 				}				
 				else {
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
