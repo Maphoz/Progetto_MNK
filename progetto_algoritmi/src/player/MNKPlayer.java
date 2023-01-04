@@ -21,8 +21,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	killer_heuristic killer;
 	int distance_from_root;
 	long key;
+	int M;  //righe
+	int N;  //colonne
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
+		this.M = M;
+		this.N = N;
 		this.key = (long)0;
 		distance_from_root = 0;
 		this.TT = new Transposition_table(M,N);
@@ -51,11 +55,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
+		
 		distance_from_root = MC.length + 1;
 		
 		//starting the time count
 		long startTime = System.currentTimeMillis();
-		System.out.println("tempo di inizio: " + startTime);
+		//System.out.println("tempo di inizio: " + startTime);
 		
 		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
@@ -67,7 +72,8 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		if(FirstTurn) {
 			MNKCell calcCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime);
-			MNKCell selected_move = FC[rand.nextInt(FC.length)];
+			//MNKCell selected_move = FC[rand.nextInt(FC.length)];
+			MNKCell selected_move = center(FC, FC.length, M, N);
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
@@ -95,6 +101,16 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	@Override
 	public String playerName() {
 		return "Giusama";
+	}
+	
+	protected MNKCell center(MNKCell[] FC, int lenght, int M, int N) { //la prima mossa la metti sempre al centro
+		MNKCell center = new MNKCell(M/2, N/2);
+		MNKCell up_left_corner = new MNKCell(M/2-1, N/2-1);
+		for(int i = 0; i<lenght; i++) {
+			if(FC[i].i == center.i && FC[i].j == center.j) 
+				return center;			
+			}
+		return up_left_corner;
 	}
 
 }
