@@ -6,6 +6,8 @@ import mnkgame.MNKCell;
 
 
 
+
+
 public class killer_heuristic {
 	
 	public class killer_cell {
@@ -19,10 +21,10 @@ public class killer_heuristic {
 		}
 	}
 	protected killer_cell[][] killerMoves;
-	protected final int slot = 2;
+	protected final int slot = 3;
 	protected final int max_distance_from_root;
 	protected final int decrement_distance_from_root; //sotto una certa soglia di distanza dalla radice non ci sono cut off 
-	protected final int weight_bound = 7;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
+	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
 	protected int[] size;
 
 	public killer_heuristic(int M, int N, int K) {
@@ -41,26 +43,20 @@ public class killer_heuristic {
 		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;
-		if(size[distance_from_root]>=2 && killerMoves[distance_from_root][slot-1].weight<=weight_bound) {
+		if(size[distance_from_root]>=slot && killerMoves[distance_from_root][slot-1].weight<=weight_bound) {
 			return;
 		}
 		killer_cell k_move = new killer_cell();
 		k_move.insert(move, weight); 
-		if(size[distance_from_root]==0) {
-			size[distance_from_root]++;
-			killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
-			adjust_weight(distance_from_root);
-		}
-		else if(size[distance_from_root]==1) {
-			if(!myEqual(move,killerMoves[distance_from_root][0].killer_move)){
-				size[distance_from_root]++;
-				killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
-				adjust_weight(distance_from_root);
-			}
-		}
+		
+		size[distance_from_root]++;
+		killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
+		adjust_weight(distance_from_root);
 	}
 
 	public boolean is_a_KM(MNKCell move, int distance_from_root) {
+		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
+			distance_from_root = max_distance_from_root - 1;
 		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;
@@ -83,58 +79,57 @@ public class killer_heuristic {
 		adjust_weight(distance_from_root);
 	}
 	public void adjust_weight(int distance_from_root) {
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
+		
+		for(int i=0; i<size[distance_from_root]; i++) {
+			for(int j=0; j<size[distance_from_root]; j++) {
+				
+				if(killerMoves[distance_from_root][i].weight>killerMoves[distance_from_root][j].weight && i<j) {
+					swapKillerCell(killerMoves[distance_from_root], i, j);
+				}
+			}
+		}
+		
 		for(int i = size[distance_from_root] - 1; i>=0; i--) {
 			if(killerMoves[distance_from_root][i].weight>weight_bound) {     //se la killer moves è scarsa la elimino
 				size[distance_from_root]--;
 			}
 		}
-				if(size[distance_from_root]==slot && killerMoves[distance_from_root][0].weight>killerMoves[distance_from_root][1].weight) {
-					killer_cell tmp = new killer_cell();
-					tmp=killerMoves[distance_from_root][0];
-					killerMoves[distance_from_root][0]=killerMoves[distance_from_root][1];
-					killerMoves[distance_from_root][1] = tmp;
-				}
+		
 	}
 	
-	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {
+	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {		
 		if(distance_from_root<decrement_distance_from_root)
 			return ;
 		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;
-		if(size[distance_from_root]<=0) {
+		if(lenght<slot)
 			return;
-		}
-		else if(lenght>=size[distance_from_root]) {
-			
-			if(size[distance_from_root]==1) {
+
+		for(int j=0; j<size[distance_from_root]; j++) {
+			for(int i=j; i<lenght; i++) {
+					if(myEqual(FC[i],killerMoves[distance_from_root][j].killer_move)) {
+						swapFC(FC, i, j);
+					}
 				
-				for(int i=0; i<lenght; i++) {
-					if(myEqual(FC[i],killerMoves[distance_from_root][0].killer_move)) {
-						MNKCell tmp = FC[0];
-						FC[0]=FC[i];
-						FC[i]=tmp;
-					}
-				}
 			}
-			else if(size[distance_from_root]==2) {
-				for(int i=0; i<lenght; i++) {
-					if(myEqual(FC[i],killerMoves[distance_from_root][0].killer_move)) {
-						MNKCell tmp = FC[0];
-						FC[0]=FC[i];
-						FC[i]=tmp;
-					}
-					if(myEqual(FC[i],killerMoves[distance_from_root][1].killer_move)) {
-						MNKCell tmp = FC[1];
-						FC[1]=FC[i];
-						FC[i]=tmp;
-					}
-				}
-			}
-		}		
+		}
+
 	}
+	
+	public void swapFC(MNKCell FC[], int index_a, int index_b) {
+		if(index_a == index_b)
+			return;
+		MNKCell tmp = FC[index_a];
+		FC[index_a] = FC[index_b];
+		FC[index_b] = tmp;
+	}
+	public void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b) {
+		killer_cell tmp = killerMoves[index_a];
+		killerMoves[index_a] = killerMoves[index_b];
+		killerMoves[index_b] = tmp;
+	}
+	
 	public boolean deep_enough(int distance_from_root) {
 		if(distance_from_root>=decrement_distance_from_root) {
 			return true;

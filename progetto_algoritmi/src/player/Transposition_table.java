@@ -24,7 +24,7 @@ public class Transposition_table {
 	protected transposition_hash_cell[] transposition_hash;    //l'hash table � 2^16, da inizializzare con tutti i campi val a -2 o comunque un valore per far capire che quella cella � vuota
 
 	public Transposition_table(int M, int N){
-		hash_size = (int)Math.pow(2,9);  //dimensione della tabella hash 
+		hash_size = (int)Math.pow(2,8);  //dimensione della tabella hash 
 		max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
 		max_ispezione = 60;
 		ScoreNotFound = -10; //indica se quando Osama controlla se � presente nella transposition_hash lo stesso Game_state, non lo trova
