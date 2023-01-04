@@ -13,7 +13,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	MNKGameState winCondition;
 	MNKGameState losCondition;
 	alphabeta solver;
-	int timeout;
+	public static int timeout;
 	boolean FirstTurn;
 	Random rand;
 	EvaluationTool eval;
@@ -51,11 +51,11 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
-		
+		distance_from_root = MC.length + 1;
 		
 		//starting the time count
 		long startTime = System.currentTimeMillis();
-		long currentTime = startTime;
+		System.out.println("tempo di inizio: " + startTime);
 		
 		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
@@ -64,20 +64,17 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			key = TT.generate_key(key, MC[MC.length - 1].i, MC[MC.length - 1].j, MC[MC.length - 1].state);
 		}
 		
+		
 		if(FirstTurn) {
-			
+			MNKCell calcCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime);
 			MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
-			
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-			int value = solver.alphaBeta(myBoard, true, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, key,eval);			//fai un alpha beta con una depth più grande perchè hai più tempo
-			//int value = -solver.alphaBeta(myBoard, true, 10, TT, killer, distance_from_root, key);		implementazione con NegaScout
 			FirstTurn = false;
 			return selected_move;
 		}
 		
-		distance_from_root++;
 		//checking if there are any winning moves
 		for (int k = 0; k < FC.length; k++) {
 			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
@@ -86,36 +83,13 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 				myBoard.unmarkCell();
 		}
 		
-		//selecting my move
-		MNKCell selected_move = FC[0];
-		int size = FC.length;
-		if(killer.deep_enough(distance_from_root)) {
-			killer.move_ordering(FC, size, distance_from_root);
-		}
-			
-		int k = 0;
-		int best_value = Integer.MIN_VALUE;			// we are always the maximizing player in this implementation
-		int value;
-		while (k < FC.length && currentTime < startTime + timeout - 200) {	
-			myBoard.markCell(FC[k].i, FC[k].j);					//mark the cell we want to test
-			eval.addSymbol(FC[k].i, FC[k].j, true);
-			key = TT.generate_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
-			value = solver.alphaBeta(myBoard, true, myBoard.M * myBoard.N - MC.length + 1, TT, killer, distance_from_root, key, eval);		
-			//value = -solver.alphaBeta(myBoard, true, 7, TT, killer, distance_from_root, key);			implementazione con NegaScout
-			if (value > best_value) {							//if the move tried is better than the previous best one, swap
-				best_value = value;
-				selected_move = FC[k];
-			}
-			key = TT.undo_key(key, FC[k].i, FC[k].j, myBoard.cellState(FC[k].i, FC[k].j));
-			myBoard.unmarkCell();								//remove the cell and iterate again
-		    eval.removeSymbol(FC[k].i, FC[k].j, true);
-			k++;
-		    currentTime = System.currentTimeMillis();
-		}
-		myBoard.markCell(selected_move.i, selected_move.j);		//mark and return the best cell foundÃ¹
-		eval.addSymbol(selected_move.i,selected_move.j, true);
-		key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
-		return selected_move;
+		
+		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime);
+		
+		myBoard.markCell(bestCell.i, bestCell.j);
+		eval.addSymbol(bestCell.i, bestCell.j, true);
+		key = TT.generate_key(key, bestCell.i, bestCell.j, myBoard.cellState(bestCell.i, bestCell.j));
+		return bestCell;
 	}
 
 	@Override

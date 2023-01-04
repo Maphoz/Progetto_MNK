@@ -13,6 +13,8 @@ public class alphabeta{
 	killer_heuristic killer;
 	long key;
 	Transposition_table TT;
+	long startingTime;
+	int time_span = 500;
 	
 	public alphabeta(MNKGameState wc, MNKGameState lc) {
 		
@@ -21,23 +23,53 @@ public class alphabeta{
 		lCond = lc;
 	}
 	
-	/*public int iterativeDeepening(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval, int timeout){
-		this.key = key;
+	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime){
 		this.TT = TT;
 		this.killer = killer;
-		long startTime = System.currentTimeMillis();
-		long currentTime = startTime;
+		
 		int depth = 1;
 		int best_value = Integer.MIN_VALUE;
-		while (currentTime < startTime + timeout*1000) {
-			int value = max(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, 0, eval);
-			currentTime = System.currentTimeMillis();
+		startingTime = startTime;
+		
+		//pre-ordering moves through killer heuristic
+		int size = FC.length;
+		if(killer.deep_enough(distance_from_root)) {
+			killer.move_ordering(FC, size, distance_from_root);
 		}
+		MNKCell selected_cell = FC[0];
+		
+		while (!outOfTime() && depth < maxDepth) {
+			for(MNKCell d : FC){
+				board.markCell(d.i, d.j);					
+				eval.addSymbol(d.i, d.j, true);
+				key = TT.generate_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				if (outOfTime()) {
+					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+					board.unmarkCell();								//remove the cell and iterate again
+			    	eval.removeSymbol(d.i, d.j, true);
+					break;
+				}
+				int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
+				if (value > best_value){
+					selected_cell = d;
+					best_value = value;
+				}
+				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				board.unmarkCell();								//remove the cell and iterate again
+		    	eval.removeSymbol(d.i, d.j, true);
+			}
+			if (outOfTime())
+				break;
+			else {
+				depth++;
+			}
 		}
-	*/
+		return selected_cell;
+	}
 	
 	
-	public int alphaBeta(MNKBoard board, boolean maximizer, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
+	
+	/*public int alphaBeta(MNKBoard board, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
 		this.key = key;
 		this.TT = TT;
 		this.killer = killer;
@@ -47,11 +79,21 @@ public class alphabeta{
 		//return NegaScoutmax(board, Integer.MAX_VALUE, Integer.MIN_VALUE, depth, distance_from_root, false);
 
 	}
+	*/
 	//---------
 	//ALPHABETA CON TT E KILLER
 	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
-
-		
+		if(depth==0) {
+			int score = TT.gain_score(key);
+			if(score==TT.ScoreNotFound) {
+				int evaluation = eval.evaluation(board, true);
+				TT.save_data(evaluation, key);
+				return evaluation;
+			}				
+			else {
+				return score;
+			}
+		}
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
 		if(killer.deep_enough(distance_from_root))
@@ -63,61 +105,21 @@ public class alphabeta{
 			state = board.markCell(d.i, d.j);	
 			eval.addSymbol(d.i, d.j, true);
 			key = TT.generate_key(key, d.i, d.j, board.cellState(d.i, d.j));
-			if(depth==0) {
-
-				int score = TT.gain_score(key);
-				
-				if(score==TT.ScoreNotFound) {
-					int evaluation = eval.evaluation(board, false);
-					TT.save_data(evaluation, key);
-					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, true);
-					return evaluation;
-				}				
-				else {
-					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, true);
-					return score;  
-				}
-			}
 			if (state == wCond) {							//if it is a winning cell, return the best evaluation
-				//int score = TT.gain_score(key);
-				
-				//if(score==TT.ScoreNotFound) {
-				//	int evaluation = 1;
-				//	TT.save_data(evaluation, key);
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, true);
-					return eval.MAX_EVALUATION;
-					//	return eval.evaluation(board, false);
-					//}			
-					//else {
-					//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					//	board.unmarkCell();
-					//	eval.removeSymbol(d.i, d.j, true);
-					//	return score;  
-					//}
+				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, true);
+				return eval.MAX_EVALUATION;
 			}
 			if (state == MNKGameState.DRAW) {				//if it is a drawing cell, return the null evaluation
-				//int score = TT.gain_score(key);
-				//if(score==TT.ScoreNotFound) {
-				//	int evaluation = 0;
-				//	TT.save_data(evaluation, key);
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				return 0;
-				//return eval.evaluation(board, false);
-				//}				
-				//else {
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				//	board.unmarkCell();
-				//	eval.removeSymbol(d.i, d.j, true);
-				//	return score;  
-				//}
+			}
+			if (outOfTime()) {
+				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, true);
+				break;
 			}
 			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1, eval);			//else recursive call and compare the evaluations
 			maxValue = Math.max(value, maxValue);
@@ -146,6 +148,16 @@ public class alphabeta{
 	
 	
 	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
+		if(depth==0) {
+			int score = TT.gain_score(key);
+			if(score==TT.ScoreNotFound) {
+				int evaluation = eval.evaluation(board, false);
+				TT.save_data(evaluation, key);
+				return evaluation;
+			}				
+			else
+				return score;  
+		}
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
@@ -158,58 +170,21 @@ public class alphabeta{
 			state = board.markCell(d.i, d.j);
 			eval.addSymbol(d.i, d.j, false);
 			key = TT.generate_key(key, d.i, d.j, board.cellState(d.i, d.j));
-			if(depth==0) {
-				int score = TT.gain_score(key);
-				if(score==TT.ScoreNotFound) {
-					int evaluation = eval.evaluation(board, true);
-					TT.save_data(evaluation, key);
-					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, false);
-					return evaluation;
-				}				
-				else {
-					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, false);
-					return score;  
-				}
-			}
 			if (state == lCond) {
-				//int score = TT.gain_score(key);
-				//if(score==TT.ScoreNotFound) {
-				//	int evaluation = -1;
-				//	TT.save_data(evaluation, key);
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-					board.unmarkCell();
-					eval.removeSymbol(d.i, d.j, false);
-					return eval.MIN_EVALUATION;
-				//	return eval.evaluation(board, true);
-				//}			
-				//else {
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				//	board.unmarkCell();
-				//	eval.removeSymbol(d.i, d.j, false);
-				//	return score;  
-				//}
+				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, false);
+				return eval.MIN_EVALUATION;
 			}
 			if (state == MNKGameState.DRAW) {
-				//int score = TT.gain_score(key);
-				//if(score==TT.ScoreNotFound) {
-				//	int evaluation = 0;
-				//	TT.save_data(evaluation, key);
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
 				return 0;
-				//return eval.evaluation(board, false);
-				//}				
-				//else {
-				//	key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				//	board.unmarkCell();
-				//	eval.removeSymbol(d.i, d.j, true);
-				//	return score;  
-				//}
+			}
+			if (outOfTime()) {
+				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				board.unmarkCell();
+				eval.removeSymbol(d.i, d.j, false);
+				break;
 			}
 			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1, eval);
 			minValue = Math.min(value, minValue);
@@ -234,6 +209,10 @@ public class alphabeta{
 			}
 		}
 		return minValue;
+	}
+	
+	protected boolean outOfTime() {
+		return (startingTime + MNKPlayer.timeout - time_span) < System.currentTimeMillis();
 	}
 	//-----------
 	//ALPHABETA CON KILLER
