@@ -11,25 +11,44 @@ public class alphabeta{
 	MNKGameState wCond;
 	MNKGameState lCond;
 	killer_heuristic killer;
-	long key;
 	Transposition_table TT;
+	long key;
 	long startingTime;
 	int time_span = 500;
+	int depth_span = 2;
+	int starting_depth;
 	
-	public alphabeta(MNKGameState wc, MNKGameState lc) {
+	public alphabeta(MNKGameState wc, MNKGameState lc, boolean first) {
 		
 		//saving the win conditions
 		wCond = wc;
 		lCond = lc;
+		if (first)
+			starting_depth = 1;
+		else
+			starting_depth = 2;
 	}
 	
-	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime){
+	public void firstIterative(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key) {
 		this.TT = TT;
 		this.killer = killer;
+		this.key = key;
 		
-		int depth = 1;
+		startingTime = startTime;
+		int depth = starting_depth;
+		
+		while (!outOfTime() && depth < maxDepth) {
+			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
+			depth += depth_span;
+		}
+	}
+	
+	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
+		int depth = starting_depth;
 		int best_value = Integer.MIN_VALUE;
 		startingTime = startTime;
+		
+		this.key = key;
 		
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
@@ -39,6 +58,7 @@ public class alphabeta{
 		MNKCell selected_cell = FC[0];
 		
 		while (!outOfTime() && depth < maxDepth) {
+			System.out.println("Iterative a depth: " + depth);
 			for(MNKCell d : FC){
 				board.markCell(d.i, d.j);					
 				eval.addSymbol(d.i, d.j, true);
@@ -61,7 +81,7 @@ public class alphabeta{
 			if (outOfTime())
 				break;
 			else {
-				depth++;
+				depth += depth_span;
 			}
 		}
 		return selected_cell;

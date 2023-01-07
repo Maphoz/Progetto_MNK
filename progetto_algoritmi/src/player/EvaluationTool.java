@@ -82,23 +82,27 @@ public class EvaluationTool {
 			if (row_symbols.containsKey(i) && row_symbols.get(i)[0] + row_symbols.get(i)[1] < board.N) {
 				if (row_symbols.get(i)[0] >= k-1) {
 					countRowSequence(board, mySymb, true, i, myThreats);
-					if (myTurn && checkWin(myTurn))
+					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
+					}
 				}
 				else if (row_symbols.get(i)[0] >= k-2) {
 					countRowSequence(board, mySymb, false, i, myThreats);
-					if (myTurn && checkWin(myTurn))
+					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
+					}
 				}
 				if (row_symbols.get(i)[1] >= k-1) {
 					countRowSequence(board, enemySymb, true, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn))
+					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
+					}
 				}
 				else if (row_symbols.get(i)[1] >= k-2) {
 					countRowSequence(board, enemySymb, false, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn))
+					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
+					}
 				}
 			}
 		}
@@ -108,23 +112,27 @@ public class EvaluationTool {
 			if (col_symbols.containsKey(i) && col_symbols.get(i)[0] + col_symbols.get(i)[1] < board.M) {
 				if (col_symbols.get(i)[0] >= k-1) {
 					countColSequence(board, mySymb, true, i, myThreats);
-					if (myTurn && checkWin(myTurn))
+					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
+					}
 				}
 				else if (col_symbols.get(i)[0] >= k-2) {
 					countColSequence(board, mySymb, false, i, myThreats);
-					if (myTurn && checkWin(myTurn))
+					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
+					}
 				}
 				if (col_symbols.get(i)[1] >= k-1) {
 					countColSequence(board, enemySymb, true, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn))
+					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
+					}
 				}
 				else if (col_symbols.get(i)[1] >= k-2) {
 					countColSequence(board, enemySymb, false, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn))
+					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
+					}
 				}
 			}
 		}
@@ -134,15 +142,33 @@ public class EvaluationTool {
 			switch (diagRow[i]) {
 				case 1: {
 					countDiagSequence(0, i, board);
+					if (myTurn && checkWin(myTurn)) {
+						return MAX_EVALUATION;
+					}
+					if (!myTurn && checkWin(myTurn)) {
+						return MIN_EVALUATION;
+					}
 					break;
 				}
 				case 2: {
 					countAntidiagSequence(0, i, board);
+					if (myTurn && checkWin(myTurn)) {
+						return MAX_EVALUATION;
+					}
+					if (!myTurn && checkWin(myTurn)) {
+						return MIN_EVALUATION;
+					}
 					break;
 				}
 				case 3:{
 					countDiagSequence(0, i, board);
 					countAntidiagSequence(0, i, board);
+					if (myTurn && checkWin(myTurn)) {
+						return MAX_EVALUATION;
+					}
+					if (!myTurn && checkWin(myTurn)) {
+						return MIN_EVALUATION;
+					}
 					break;
 				}
 				default:
@@ -153,7 +179,19 @@ public class EvaluationTool {
 		int i = 1;
 		while (diagCol[i] > 0) {
 			countDiagSequence(i, 0, board);
+			if (myTurn && checkWin(myTurn)) {
+				return MAX_EVALUATION;
+			}
+			if (!myTurn && checkWin(myTurn)) {
+				return MIN_EVALUATION;
+			}
 			countAntidiagSequence(i, board.N - 1, board);
+			if (myTurn && checkWin(myTurn)) {
+				return MAX_EVALUATION;
+			}
+			if (!myTurn && checkWin(myTurn)) {
+				return MIN_EVALUATION;
+			}
 			i++;
 		}
 		
@@ -249,8 +287,9 @@ public class EvaluationTool {
 						}
 						symCount++;
 					}
-					if (!diff_symb && symCount == k-2 && board.cellState(row, z + symCount + 1) == MNKCellState.FREE)
-						threats[k2OpenIndex]++;
+					if (!diff_symb && symCount == k-2 && board.cellState(row, z + symCount + 1) == MNKCellState.FREE) {
+						threats[k2OpenIndex]++;					
+					}
 				}
 			}
 		}
@@ -296,8 +335,9 @@ public class EvaluationTool {
 						j++;
 					}
 					if (j == board.M) {
-						if (symCount == k-1)
+						if (symCount == k-1) {
 							threats[k1SopenIndex]++;
+						}
 						return;
 					}
 					else {
@@ -326,7 +366,7 @@ public class EvaluationTool {
 			}
 		}
 		else {
-			for (int z = 0; z < board.M - k; z++) {
+			for (int z = 0; z < board.M - k + 1; z++) {
 				if (board.cellState(z, col) == MNKCellState.FREE && board.cellState(z+1, col) == symb) {
 					boolean diff_symb = false;
 					int symCount = 1;
@@ -362,8 +402,9 @@ public class EvaluationTool {
 						j++;
 					}
 					if (row + j == board.M || col + j == board.N) {
-						if (symCount == k - 1)
+						if (symCount == k - 1) {
 							increaseThreat(k1SopenIndex, symb);
+						}
 						return;
 					}
 					else {
@@ -392,6 +433,7 @@ public class EvaluationTool {
 				int zeros_count = 0;
 				boolean diff_symb = false;
 				int counter = 1;
+				int symb_count = 1;
 				while ((row + i + counter) < board.M && (col + i + counter) < board.N && counter < k) {
 					if (board.cellState(row + i + counter, col + i + counter) == MNKCellState.FREE) { 
 						zeros_count++;
@@ -402,9 +444,11 @@ public class EvaluationTool {
 						diff_symb = true;
 						break;
 					}
+					else
+						symb_count++;
 					counter++;
 				}
-				if (zeros_count <= 1 && !diff_symb) {
+				if (zeros_count <= 1 && !diff_symb && symb_count == k-1) {
 					increaseThreat(k1SopenIndex, symb);
 					i++;
 				}
@@ -431,8 +475,9 @@ public class EvaluationTool {
 						j++;
 					}
 					if (row + j == board.M || col - j == - 1) {
-						if (symCount == k - 1)
+						if (symCount == k - 1) {
 							increaseThreat(k1SopenIndex, symb);
+						}
 						return;
 					}
 					else {
@@ -461,6 +506,7 @@ public class EvaluationTool {
 				int zeros_count = 0;
 				boolean diff_symb = false;
 				int counter = 1;
+				int symbCount = 1;
 				while (counter < k && (row + i + counter) < board.M && (col - i - counter) >= 0) {
 					if (board.cellState(row + i + counter, col - i - counter) == MNKCellState.FREE) { 
 						zeros_count++;
@@ -471,9 +517,11 @@ public class EvaluationTool {
 						diff_symb = true;
 						break;
 					}
+					else
+						symbCount++;
 					counter++;
 				}
-				if (zeros_count <= 1 && !diff_symb) {
+				if (zeros_count <= 1 && !diff_symb && symbCount == k-1) {
 					increaseThreat(k1SopenIndex, symb);
 					i++;
 				}
@@ -514,7 +562,6 @@ public class EvaluationTool {
 	 */
 	
 	public void addSymbol(int row, int col, boolean my_move) {
-		//System.out.println("add row : " + row + " col : " + col + " my_move : " + my_move);
 		if (my_move) {
 			if (!row_symbols.containsKey(row)) {
 				row_symbols.put(row, new int[] {0, 0});
@@ -542,7 +589,6 @@ public class EvaluationTool {
 	
 	
 	public void removeSymbol(int row, int col, boolean my_move) {
-		//System.out.println("remove row : " + row + " col : " + col + " my_move : " + my_move);
 		if (my_move) {
 			row_symbols.get(row)[0]--;
 			col_symbols.get(col)[0]--;

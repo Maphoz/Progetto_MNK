@@ -49,7 +49,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			losCondition = MNKGameState.WINP1;
 		}
 		//instance of the alphabeta class to solve the problem
-		solver = new alphabeta(winCondition, losCondition);
+		solver = new alphabeta(winCondition, losCondition, first);
 		eval = new EvaluationTool(M, N, K, first);
 		
 	}
@@ -71,12 +71,11 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		
 		if(FirstTurn) {
-			MNKCell calcCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime);
-			//MNKCell selected_move = FC[rand.nextInt(FC.length)];
 			MNKCell selected_move = center(FC, FC.length, M, N);
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
 			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
+			solver.firstIterative(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 			FirstTurn = false;
 			return selected_move;
 		}
@@ -90,7 +89,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		}
 		
 		
-		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime);
+		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 		
 		myBoard.markCell(bestCell.i, bestCell.j);
 		eval.addSymbol(bestCell.i, bestCell.j, true);
