@@ -55,9 +55,9 @@ public class EvaluationTool {
 		diagonalCalculations(m, n, k);
 		
 		threatsEval = new int[MAX_THREATS];
-		threatsEval[k1OpenIndex] = 100;
-		threatsEval[k2OpenIndex] = 10;
-		threatsEval[k1SopenIndex] = 1;
+		threatsEval[k1OpenIndex] = 5020;
+		threatsEval[k2OpenIndex] = 2000;
+		threatsEval[k1SopenIndex] = 1300;
 		
 		myThreats = new int[MAX_THREATS];
 		enemyThreats = new int[MAX_THREATS];
@@ -195,7 +195,7 @@ public class EvaluationTool {
 			i++;
 		}
 		
-		return threatCalculation();
+		return threatCalculation(myTurn);
 	}
 	
 	
@@ -620,7 +620,12 @@ public class EvaluationTool {
 	
 	
 	//computes the number of threats * evaluation
-	protected int threatCalculation() {
+	protected int threatCalculation(boolean myTurn) {
+		if (myTurn && (enemyThreats[k1OpenIndex] > 0 || enemyThreats[k1SopenIndex] > 1))
+			return MIN_EVALUATION;
+		
+		if (!myTurn && (myThreats[k1OpenIndex] > 0 || myThreats[k1SopenIndex] > 1))
+			return MAX_EVALUATION;
 		int eval = 0;
 		for (int i = 0; i < MAX_THREATS; i++) {
 			eval = eval + (myThreats[i] - enemyThreats[i]) * threatsEval[i];

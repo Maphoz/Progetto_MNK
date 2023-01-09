@@ -47,7 +47,7 @@ public class alphabeta{
 		int depth = starting_depth;
 		int best_value = Integer.MIN_VALUE;
 		startingTime = startTime;
-		
+
 		this.key = key;
 		
 		//pre-ordering moves through killer heuristic
@@ -56,7 +56,6 @@ public class alphabeta{
 			killer.move_ordering(FC, size, distance_from_root);
 		}
 		MNKCell selected_cell = FC[0];
-		
 		while (!outOfTime() && depth < maxDepth + 1) {
 			for(MNKCell d : FC){
 				board.markCell(d.i, d.j);					
