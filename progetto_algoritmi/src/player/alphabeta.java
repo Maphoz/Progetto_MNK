@@ -37,7 +37,7 @@ public class alphabeta{
 		startingTime = startTime;
 		int depth = starting_depth;
 		
-		while (!outOfTime() && depth < maxDepth) {
+		while (!outOfTime() && depth < maxDepth + 1) {
 			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
 			depth += depth_span;
 		}
@@ -57,8 +57,7 @@ public class alphabeta{
 		}
 		MNKCell selected_cell = FC[0];
 		
-		while (!outOfTime() && depth < maxDepth) {
-			System.out.println("Iterative a depth: " + depth);
+		while (!outOfTime() && depth < maxDepth + 1) {
 			for(MNKCell d : FC){
 				board.markCell(d.i, d.j);					
 				eval.addSymbol(d.i, d.j, true);
