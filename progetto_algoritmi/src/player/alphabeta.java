@@ -123,8 +123,9 @@ public class alphabeta{
 		}
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
-		if(killer.deep_enough(distance_from_root))
-			killer.move_ordering(FC, lenght, distance_from_root);
+		if(killer.deep_enough(distance_from_root)) {
+			
+			killer.move_ordering(FC, lenght, distance_from_root);}
 		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
 		for (int i = 0; i< lenght; i++) {

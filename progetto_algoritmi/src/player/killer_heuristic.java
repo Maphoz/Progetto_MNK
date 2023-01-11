@@ -97,25 +97,28 @@ public class killer_heuristic {
 		
 	}
 	
-	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {		
+	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {	
+		
 		if(distance_from_root<decrement_distance_from_root)
 			return ;
 		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;
-		if(lenght<slot)
+		if(lenght<size[distance_from_root])
 			return;
-
+		int counter = 0;
 		for(int j=0; j<size[distance_from_root]; j++) {
-			for(int i=j; i<lenght; i++) {
+			for(int i=counter; i<lenght; i++) {
 					if(myEqual(FC[i],killerMoves[distance_from_root][j].killer_move)) {
-						swapFC(FC, i, j);
-					}
-				
+						swapFC(FC, i, counter);
+						counter ++;
+					}		
 			}
 		}
-
 	}
+	
+	
+	
 	
 	public void swapFC(MNKCell FC[], int index_a, int index_b) {
 		if(index_a == index_b)
