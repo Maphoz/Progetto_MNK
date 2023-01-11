@@ -23,6 +23,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	long key;
 	int M;  //righe
 	int N;  //colonne
+	public static int threatBoard[][];
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		this.M = M;
@@ -52,6 +53,9 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		solver = new alphabeta(winCondition, losCondition, first);
 		eval = new EvaluationTool(M, N, K, first);
 		
+		threatBoard = new int[M][N];
+		calculateCellThreats(K);
+		
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
@@ -79,7 +83,6 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			FirstTurn = false;
 			return selected_move;
 		}
-		
 		//checking if there are any winning moves
 		for (int k = 0; k < FC.length; k++) {
 			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
@@ -110,6 +113,35 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 				return center;			
 			}
 		return up_left_corner;
+	}
+	
+	protected void calculateCellThreats(int k){
+		for (int i = 0; i < M; i++){
+			for (int j = 0; j < N; j++){
+				threatBoard[i][j] = 2;
+				if (canBelongDiagonal(i, j, k))
+					threatBoard[i][j]++;
+				if (canBelongDiagonal(i, N - j - 1, k))			//calling this function with the opposite column returns wheter a cell can belong to an antiagonal (math)
+					threatBoard[i][j]++;
+			}
+		}
+	}
+
+	protected boolean canBelongDiagonal(int row, int col, int k){
+		int x, y;
+		if (row > col){
+			x = row - col;
+			y = 0;
+			return(Math.min(M - x, N) >= k);
+		}
+		else if (col > row){
+			x = 0;
+			y = col - row;
+			return(Math.min(M, N - y) >= k);
+		}
+		else{
+			return(Math.min(M, N) >= k);
+		}
 	}
 
 }

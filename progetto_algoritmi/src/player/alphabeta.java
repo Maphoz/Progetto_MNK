@@ -14,8 +14,8 @@ public class alphabeta{
 	Transposition_table TT;
 	long key;
 	long startingTime;
-	int time_span = 500;
-	int depth_span = 2;
+	int time_span = 200;
+	int depth_span = 1;
 	int starting_depth;
 	
 	public alphabeta(MNKGameState wc, MNKGameState lc, boolean first) {
@@ -44,19 +44,22 @@ public class alphabeta{
 	}
 	
 	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
-		int depth = starting_depth;
-		int best_value = Integer.MIN_VALUE;
-		startingTime = startTime;
-
 		this.key = key;
+		
+		int depth = starting_depth;
+		startingTime = startTime;
 		
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
 		if(killer.deep_enough(distance_from_root)) {
 			killer.move_ordering(FC, size, distance_from_root);
 		}
+		
 		MNKCell selected_cell = FC[0];
+		MNKCell previousBestCell = FC[0];
 		while (!outOfTime() && depth < maxDepth + 1) {
+			int best_value = Integer.MIN_VALUE;
+			selected_cell = FC[0];
 			for(MNKCell d : FC){
 				board.markCell(d.i, d.j);					
 				eval.addSymbol(d.i, d.j, true);
@@ -68,7 +71,10 @@ public class alphabeta{
 					break;
 				}
 				int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
-				if (value > best_value){
+				if (value == best_value){
+					selected_cell = smartestCell(selected_cell, d);
+				}
+				else if (value > best_value){
 					selected_cell = d;
 					best_value = value;
 				}
@@ -76,9 +82,12 @@ public class alphabeta{
 				board.unmarkCell();								//remove the cell and iterate again
 		    	eval.removeSymbol(d.i, d.j, true);
 			}
-			if (outOfTime())
+			if (outOfTime()) {
+				selected_cell = previousBestCell;
 				break;
+			}
 			else {
+				previousBestCell = selected_cell;
 				depth += depth_span;
 			}
 		}
@@ -231,6 +240,16 @@ public class alphabeta{
 	
 	protected boolean outOfTime() {
 		return (startingTime + MNKPlayer.timeout - time_span) < System.currentTimeMillis();
+	}
+	
+	protected MNKCell smartestCell(MNKCell a, MNKCell b){
+		int dangerA = MNKPlayer.threatBoard[a.i][a.j];
+		int dangerB = MNKPlayer.threatBoard[b.i][b.j];
+
+		if (dangerA < dangerB)
+			return b;
+		else
+			return a;
 	}
 	//-----------
 	//ALPHABETA CON KILLER

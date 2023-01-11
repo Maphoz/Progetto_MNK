@@ -11,11 +11,11 @@ public class EvaluationTool {
 	int k1SopenIndex = 2;
 	int threatsEval[];
 	int MAX_THREATS = 3;
-	int myThreats[];
-	int enemyThreats[];
+	public static int myThreats[];
+	public static int enemyThreats[];
 	
-	public int MAX_EVALUATION = 200;				//if we win
-	public int MIN_EVALUATION = -200;				//if enemy player win
+	public int MAX_EVALUATION = 100000;				//if we win
+	public int MIN_EVALUATION = -100000;				//if enemy player win
 	
 	//maps that store how many symbols there are in each row/column to evaluate a board
 	//saves time if n symbols < k-2
@@ -436,11 +436,14 @@ public class EvaluationTool {
 				int symb_count = 1;
 				while ((row + i + counter) < board.M && (col + i + counter) < board.N && counter < k) {
 					if (board.cellState(row + i + counter, col + i + counter) == MNKCellState.FREE) { 
+						if (zeros_count == 0)
+							future_index = i + counter;
+						else
+							future_index = i + counter - 1;
 						zeros_count++;
-						future_index = i + counter;
 					}
 					else if (board.cellState(row + i + counter, col + i + counter) != symb) {
-						future_index = i + counter + 1;
+						future_index = i + counter;
 						diff_symb = true;
 						break;
 					}
@@ -509,11 +512,14 @@ public class EvaluationTool {
 				int symbCount = 1;
 				while (counter < k && (row + i + counter) < board.M && (col - i - counter) >= 0) {
 					if (board.cellState(row + i + counter, col - i - counter) == MNKCellState.FREE) { 
+						if (zeros_count == 0)
+							future_index = i + counter;
+						else
+							future_index = i + counter - 1;
 						zeros_count++;
-						future_index = i + counter;
 					}
 					else if (board.cellState(row + i + counter, col - i - counter) != symb) {
-						future_index = i + counter + 1;
+						future_index = i + counter;
 						diff_symb = true;
 						break;
 					}
