@@ -24,6 +24,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	int M;  //righe
 	int N;  //colonne
 	public static int threatBoard[][];
+	
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
 		this.M = M;

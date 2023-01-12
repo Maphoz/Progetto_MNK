@@ -1,18 +1,22 @@
 package player;
 import java.util.Random;
 import mnkgame.MNKCellState;
+import player.memory;
 
 
 public class Transposition_table {
 	private class transposition_hash_cell {
 		public short score;
-		public short depth;     //sarebbe la distanza dalle foglie e serve a capire se dobbiamo prendere il valore nella cella della TT o se è scarso, impreciso e lo dobbiamo ricalcolare
+		public short depth;     //sarebbe la distanza dalle foglie e serve a capire se dobbiamo prendere il valore nella cella della TT o se ï¿½ scarso, impreciso e lo dobbiamo ricalcolare
 		public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
+		public byte i;
+		public byte j;
 		public transposition_hash_cell(int score){	
 			this.score=(short)score;
 			this.depth = 0;
 			this.mask_key = 0;
-			
+			this.i = -1;
+			this.j = -1;
 		}
 	}
 	
@@ -97,17 +101,23 @@ public class Transposition_table {
 		}
 		
 	}*/
-	public int gain_score (long key, int depth){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non ï¿½ stato trovato
+	public memory gain_score (long key, int depth){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non ï¿½ stato trovato
 		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+		memory mem;
 		if(transposition_hash[transposition_table_index].depth>=depth) {
 			
 			if(transposition_hash[transposition_table_index].mask_key == (short) key) { //le collisioni dovute alla maschera sono estremamente basse
-				return (int)transposition_hash[transposition_table_index].score;
+				mem = new memory((int)transposition_hash[transposition_table_index].score, (int)transposition_hash[transposition_table_index].i, (int)transposition_hash[transposition_table_index].j, (int)transposition_hash[transposition_table_index].depth);
+				return mem;
 			}
-			else return ScoreNotFound;
+			else {
+				mem = new memory(ScoreNotFound, -1, -1, -1);
+				return mem;
+			}
 		}
 		else {
-			return ScoreNotFound;
+			mem = new memory(ScoreNotFound, -1, -1, -1);
+			return mem;
 		}
 		/*
 		int i=0;
@@ -126,15 +136,17 @@ public class Transposition_table {
 }
 
 	//Osama genera la chiave, controlla se e' presente nella tabella tramite gain_score, se non c'e' fa una evaluation e poi salva lo score con save_data
-	public void save_data(int score, long key, int depth){
+	public void save_data(int score, long key, int depth, int i, int j){
 		int transposition_table_index =  Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 		/*if(transposition_table_index==ScoreNotFound) {
 			return;
 		}*/
-		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso già presente nella TT
+		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso giï¿½ presente nella TT
 			transposition_hash[transposition_table_index].score=(short)score;
 			transposition_hash[transposition_table_index].depth=(short)depth;
 			transposition_hash[transposition_table_index].mask_key=(short)key; 
+			transposition_hash[transposition_table_index].i = (byte)i;
+			transposition_hash[transposition_table_index].j = (byte)j;
 		}
 	}
 	
