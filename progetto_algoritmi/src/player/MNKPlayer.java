@@ -83,14 +83,31 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			FirstTurn = false;
 			return selected_move;
 		}
-		//checking if there are any winning moves
-		for (int k = 0; k < FC.length; k++) {
-			if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
-				return FC[k];
-			else
-				myBoard.unmarkCell();
-		}
 		
+		
+		//checking if there are any winning or losing moves
+		if (FC.length == 1)
+			return FC[0];
+		else {
+			for (int k = 0; k < FC.length; k++) {
+				if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
+					return FC[k];
+				else {
+					if (myBoard.markCell(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j) == losCondition) {
+						myBoard.unmarkCell();
+						myBoard.unmarkCell();
+						myBoard.markCell(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j);
+						eval.addSymbol(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j, true);
+						key = TT.generate_key(key, FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j, myBoard.cellState(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j));
+						return FC[(k+1)%FC.length];
+					}
+					else {
+						myBoard.unmarkCell();
+						myBoard.unmarkCell();
+					}
+				}
+			}
+		}
 		
 		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 		

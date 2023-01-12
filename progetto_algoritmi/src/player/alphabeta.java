@@ -92,8 +92,9 @@ public class alphabeta{
 			}
 			if (outOfTime()) {
 				if (!previousEvaluated) {
-					if (best_value < previousBestValue)
+					if (best_value < eval.MAX_EVALUATION) {
 						selected_cell = previousBestCell;
+					}
 				}
 				else {
 					if (best_value == eval.MIN_EVALUATION) {
