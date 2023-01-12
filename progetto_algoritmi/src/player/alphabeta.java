@@ -111,10 +111,10 @@ public class alphabeta{
 	//ALPHABETA CON TT E KILLER
 	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
 		if(depth==0) {
-			int score = TT.gain_score(key);
+			int score = TT.gain_score(key, depth);
 			if(score==TT.ScoreNotFound) {
 				int evaluation = eval.evaluation(board, true);
-				TT.save_data(evaluation, key);
+				TT.save_data(evaluation, key, depth);
 				return evaluation;
 			}				
 			else {
@@ -177,10 +177,10 @@ public class alphabeta{
 	
 	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval) {
 		if(depth==0) {
-			int score = TT.gain_score(key);
+			int score = TT.gain_score(key, depth);
 			if(score==TT.ScoreNotFound) {
 				int evaluation = eval.evaluation(board, false);
-				TT.save_data(evaluation, key);
+				TT.save_data(evaluation, key, depth);
 				return evaluation;
 			}				
 			else

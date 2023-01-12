@@ -5,19 +5,21 @@ import mnkgame.MNKCellState;
 
 public class Transposition_table {
 	private class transposition_hash_cell {
-		public int score;
-		public long key;
-		public transposition_hash_cell(int score, long key){	
-			this.score=score;
-			this.key = key;
+		public short score;
+		public short depth;     //sarebbe la distanza dalle foglie e serve a capire se dobbiamo prendere il valore nella cella della TT o se è scarso, impreciso e lo dobbiamo ricalcolare
+		public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
+		public transposition_hash_cell(int score){	
+			this.score=(short)score;
+			this.depth = 0;
+			this.mask_key = 0;
 			
 		}
 	}
 	
 	protected final int hash_size;
 	protected final int ScoreNotFound;
-	protected final int max_ite;
-	protected final int max_ispezione;
+	//protected final int max_ite;
+	//protected final int max_ispezione;
 	protected int M;
 	protected int N;
 	protected long[][][] storage;//deve essere una matrice tridimensionale
@@ -25,12 +27,12 @@ public class Transposition_table {
 
 	public Transposition_table(int M, int N){
 		hash_size = (int)Math.pow(2,8);  //dimensione della tabella hash 
-		max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
-		max_ispezione = 60;
-		ScoreNotFound = -10; //indica se quando Osama controlla se ï¿½ presente nella transposition_hash lo stesso Game_state, non lo trova
+		//max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
+		//max_ispezione = 60;
+		ScoreNotFound = -10; //indica se quando Osama controlla se e' presente nella transposition_hash lo score , non lo trova
 		transposition_hash = new transposition_hash_cell[hash_size];
 		for(int i=0; i<hash_size; i++){
-			transposition_hash_cell t = new transposition_hash_cell(-2, 0);
+			transposition_hash_cell t = new transposition_hash_cell(-2);
 			transposition_hash[i] = t;
 		}
 		this.M=M;
@@ -76,10 +78,13 @@ public class Transposition_table {
 	    x ^= x >>> 16;
 	    return x;
 	}
-
+/*
 	private int ispezione (long key){ //trova la prima cella libera 
-		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
-		int i = 0;
+		return  Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+		//int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+		//int i = 0;
+		
+		/*
 		while(true){	
 			if(transposition_hash[transposition_table_index].score==-2){ //hai trovato una cella vuota
 				return transposition_table_index;
@@ -90,11 +95,23 @@ public class Transposition_table {
 			transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 			i++;      
 		}
-	}
-
-	public int gain_score (long key){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non ï¿½ stato trovato
+		
+	}*/
+	public int gain_score (long key, int depth){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non ï¿½ stato trovato
 		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+		if(transposition_hash[transposition_table_index].depth>=depth) {
+			
+			if(transposition_hash[transposition_table_index].mask_key == (short) key) { //le collisioni dovute alla maschera sono estremamente basse
+				return (int)transposition_hash[transposition_table_index].score;
+			}
+			else return ScoreNotFound;
+		}
+		else {
+			return ScoreNotFound;
+		}
+		/*
 		int i=0;
+		
 		while(true){ 
 			if(transposition_hash[transposition_table_index].key==key) {
 				return transposition_hash[transposition_table_index].score;
@@ -105,16 +122,20 @@ public class Transposition_table {
 				return ScoreNotFound;
 			}
 		}
+		*/
 }
 
-	//Osama genera la chiave, controlla se ï¿½ presente nella tabella tramite gain_score, se non c'ï¿½ fa una evaluation e poi salva lo score con save_data
-	public void save_data(int score, long key){
-		int transposition_table_index = ispezione(key);
-		if(transposition_table_index==ScoreNotFound) {
+	//Osama genera la chiave, controlla se e' presente nella tabella tramite gain_score, se non c'e' fa una evaluation e poi salva lo score con save_data
+	public void save_data(int score, long key, int depth){
+		int transposition_table_index =  Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+		/*if(transposition_table_index==ScoreNotFound) {
 			return;
+		}*/
+		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso già presente nella TT
+			transposition_hash[transposition_table_index].score=(short)score;
+			transposition_hash[transposition_table_index].depth=(short)depth;
+			transposition_hash[transposition_table_index].mask_key=(short)key; 
 		}
-		transposition_hash[transposition_table_index].score=score;
-		transposition_hash[transposition_table_index].key=key;
 	}
 	
 	public boolean are_transpositions(MNKCellState[][] A, MNKCellState[][] B, int M, int N){
