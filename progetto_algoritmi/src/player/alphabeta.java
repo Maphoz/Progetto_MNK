@@ -57,7 +57,10 @@ public class alphabeta{
 		
 		MNKCell selected_cell = FC[0];
 		MNKCell previousBestCell = FC[0];
+		int previousBestValue = 0;
+		boolean previousEvaluated = false;
 		while (!outOfTime() && depth < maxDepth + 1) {
+			previousEvaluated = false;
 			int best_value = Integer.MIN_VALUE;
 			selected_cell = FC[0];
 			for(MNKCell d : FC){
@@ -69,6 +72,9 @@ public class alphabeta{
 					board.unmarkCell();								//remove the cell and iterate again
 			    	eval.removeSymbol(d.i, d.j, true);
 					break;
+				}
+				if (d.i == previousBestCell.i && d.j == previousBestCell.j) {
+					previousEvaluated = true;
 				}
 				int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
 				if (value == best_value){
@@ -83,11 +89,17 @@ public class alphabeta{
 		    	eval.removeSymbol(d.i, d.j, true);
 			}
 			if (outOfTime()) {
-				selected_cell = previousBestCell;
+				if (!previousEvaluated) {
+					if (best_value < previousBestValue)
+						selected_cell = previousBestCell;
+				}	
 				break;
 			}
 			else {
-				previousBestCell = selected_cell;
+				if (best_value != eval.MIN_EVALUATION) {
+					previousBestCell = selected_cell;
+					previousBestValue = best_value;
+				}
 				depth += depth_span;
 			}
 		}
