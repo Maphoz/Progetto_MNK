@@ -60,6 +60,7 @@ public class alphabeta{
 		int previousBestValue = 0;
 		boolean previousEvaluated = false;
 		while (!outOfTime() && depth < maxDepth + 1) {
+			//System.out.println("Sto facendo iterative a depth: " + depth);
 			previousEvaluated = false;
 			int best_value = Integer.MIN_VALUE;
 			selected_cell = FC[0];
@@ -77,6 +78,7 @@ public class alphabeta{
 					previousEvaluated = true;
 				}
 				int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
+				//System.out.println("La mossa: " + d.i + " " + d.j + " ha dato valutazione: " + value);
 				if (value == best_value){
 					selected_cell = smartestCell(selected_cell, d);
 				}
@@ -92,7 +94,12 @@ public class alphabeta{
 				if (!previousEvaluated) {
 					if (best_value < previousBestValue)
 						selected_cell = previousBestCell;
-				}	
+				}
+				else {
+					if (best_value == eval.MIN_EVALUATION) {
+						selected_cell = previousBestCell;
+					}
+				}
 				break;
 			}
 			else {
