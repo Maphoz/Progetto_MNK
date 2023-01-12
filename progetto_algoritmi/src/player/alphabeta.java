@@ -97,14 +97,14 @@ public class alphabeta{
 					}
 				}
 				else {
-					if (best_value == eval.MIN_EVALUATION) {
+					if (best_value == eval.MIN_EVALUATION && best_value == eval.MAX_EVALUATION) {
 						selected_cell = previousBestCell;
 					}
 				}
 				break;
 			}
 			else {
-				if (best_value != eval.MIN_EVALUATION) {
+				if (best_value != eval.MIN_EVALUATION && best_value != eval.MAX_EVALUATION) {
 					previousBestCell = selected_cell;
 					previousBestValue = best_value;
 				}
