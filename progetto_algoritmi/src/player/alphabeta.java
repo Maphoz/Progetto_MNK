@@ -34,7 +34,7 @@ public class alphabeta{
 		int depth = starting_depth;
 	
 		while (!outOfTime() && depth < maxDepth + 1) {
-				System.out.println("sto facendo ID e sono a depth " + depth);
+			//System.out.println("sto facendo ID e sono a depth " + depth);
 			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
 			depth += depth_span;
 		}
@@ -63,7 +63,7 @@ public class alphabeta{
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
 			System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " tempCell: " + tempCell.i + " " + tempCell.j);
-			depth = history.depth;
+			depth = history.depth + 1;
 		}
 		
 		System.out.println("parto a fare l'iterative deepening a partire dalla depth: " + depth);
@@ -177,7 +177,7 @@ public class alphabeta{
 			}
 			if (outOfTime()) {
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
+				//TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				break;
@@ -257,7 +257,7 @@ public class alphabeta{
 			}
 			if (outOfTime()) {
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);	
+				//TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);	
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
 				break;
@@ -293,6 +293,7 @@ public class alphabeta{
 				
 			}
 		}
+		//System.out.println("A depth: " + depth + " ho trovato che la miglior mossa e: " + bestCell.i + " " + bestCell.j);
 		return minValue;
 	}
 	
