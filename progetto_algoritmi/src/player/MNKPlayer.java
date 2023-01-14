@@ -87,6 +87,8 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		
 		//checking if there are any winning or losing moves
+		MNKCell enemy_winning = FC[0];
+		boolean enemyWin = false;
 		if (FC.length == 1)
 			return FC[0];
 		else {
@@ -95,12 +97,10 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 					return FC[k];
 				else {
 					if (myBoard.markCell(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j) == losCondition) {
+						enemyWin = true;
+						enemy_winning = FC[(k+1)%FC.length];
 						myBoard.unmarkCell();
 						myBoard.unmarkCell();
-						myBoard.markCell(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j);
-						eval.addSymbol(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j, true);
-						key = TT.generate_key(key, FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j, myBoard.cellState(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j));
-						return FC[(k+1)%FC.length];
 					}
 					else {
 						myBoard.unmarkCell();
@@ -108,6 +108,12 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 					}
 				}
 			}
+		}
+		if (enemyWin) {
+			myBoard.markCell(enemy_winning.i, enemy_winning.j);
+			eval.addSymbol(enemy_winning.i, enemy_winning.j, true);
+			key = TT.generate_key(key, enemy_winning.i, enemy_winning.j, myBoard.cellState(enemy_winning.i, enemy_winning.j));
+			return enemy_winning;
 		}
 		
 		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
