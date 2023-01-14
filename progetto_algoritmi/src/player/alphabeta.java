@@ -14,7 +14,7 @@ public class alphabeta{
 	Transposition_table TT;
 	long key;
 	long startingTime;
-	int time_span = 200;
+	int time_span = 500;
 	int depth_span = 1;
 	int starting_depth = 1;
 	
@@ -32,8 +32,9 @@ public class alphabeta{
 		
 		startingTime = startTime;
 		int depth = starting_depth;
-
+	
 		while (!outOfTime() && depth < maxDepth + 1) {
+				System.out.println("sto facendo ID e sono a depth " + depth);
 			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
 			depth += depth_span;
 		}
@@ -70,7 +71,7 @@ public class alphabeta{
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
 		while (!outOfTime() && depth < maxDepth + 1) {
-			//System.out.println("Sto facendo iterative a depth: " + depth);
+			System.out.println("Sto facendo iterative a depth: " + depth);
 			int best_value = Integer.MIN_VALUE;
 			previousEvaluated = false;
 			selected_cell = FC[0];
@@ -175,24 +176,25 @@ public class alphabeta{
 				return 0;
 			}
 			if (outOfTime()) {
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				break;
 			}
 			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1, eval);			//else recursive call and compare the evaluations
+			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			if (value > maxValue) {
 				bestCell = d;
 				maxValue = value;
 				bestKey = key;
 			}
 			alpha = Math.max(alpha, maxValue);
+			
 			if (i == lenght-1){
 				//System.out.println("Sono nella chiamata max e sto salvando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
 				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
 			}
-			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, true);
 			if (alpha >= beta) { 
@@ -254,22 +256,23 @@ public class alphabeta{
 				return 0;
 			}
 			if (outOfTime()) {
-				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);	
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
 				break;
 			}
 			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1, eval);
+			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			if (value < minValue) {
 				bestCell = d;
 				minValue = value;
 				bestKey = key;
 			}
 			beta = Math.min(beta, minValue);
+			
 			if (i == lenght - 1)
 				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
-			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, false);
 			if (alpha >= beta) { 
@@ -279,6 +282,7 @@ public class alphabeta{
 				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
+				//System.out.println("Sono nella chiamata max e sto prunando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
 				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
 				break;
 			}

@@ -142,6 +142,7 @@ public class Transposition_table {
 			return;
 		}*/
 		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
+			//System.out.println("ho salvato a depth " + depth + " la cella " + i + " " + j);
 			transposition_hash[transposition_table_index].score=(short)score;
 			transposition_hash[transposition_table_index].depth=(short)depth;
 			transposition_hash[transposition_table_index].mask_key=(short)key; 
