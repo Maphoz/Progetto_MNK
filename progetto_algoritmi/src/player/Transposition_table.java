@@ -11,6 +11,7 @@ public class Transposition_table {
 		public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
 		public byte i;
 		public byte j;
+		public boolean flag;
 		public transposition_hash_cell(int score){	
 			this.score=(short)score;
 			this.depth = 0;
@@ -104,19 +105,19 @@ public class Transposition_table {
 	public memory gain_score (long key, int depth){   //funzione che deve fare osama per prendere lo score, ritorna la costante ScoreNotFound se non � stato trovato
 		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 		memory mem;
-		if(transposition_hash[transposition_table_index].depth>=depth) {
+		if(transposition_hash[transposition_table_index].depth >= depth) {
 			
 			if(transposition_hash[transposition_table_index].mask_key == (short) key) { //le collisioni dovute alla maschera sono estremamente basse
-				mem = new memory((int)transposition_hash[transposition_table_index].score, (int)transposition_hash[transposition_table_index].i, (int)transposition_hash[transposition_table_index].j, (int)transposition_hash[transposition_table_index].depth);
+				mem = new memory((int)transposition_hash[transposition_table_index].score, (int)transposition_hash[transposition_table_index].i, (int)transposition_hash[transposition_table_index].j, (int)transposition_hash[transposition_table_index].depth, transposition_hash[transposition_table_index].flag);
 				return mem;
 			}
 			else {
-				mem = new memory(ScoreNotFound, -1, -1, -1);
+				mem = new memory(ScoreNotFound, -1, -1, -1, false);
 				return mem;
 			}
 		}
 		else {
-			mem = new memory(ScoreNotFound, -1, -1, -1);
+			mem = new memory(ScoreNotFound, -1, -1, -1, false);
 			return mem;
 		}
 		/*
@@ -136,7 +137,7 @@ public class Transposition_table {
 }
 
 	//Osama genera la chiave, controlla se e' presente nella tabella tramite gain_score, se non c'e' fa una evaluation e poi salva lo score con save_data
-	public void save_data(int score, long key, int depth, int i, int j){
+	public void save_data(int score, long key, int depth, int i, int j, boolean flag){
 		int transposition_table_index =  Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 		/*if(transposition_table_index==ScoreNotFound) {
 			return;
@@ -148,6 +149,7 @@ public class Transposition_table {
 			transposition_hash[transposition_table_index].mask_key=(short)key; 
 			transposition_hash[transposition_table_index].i = (byte)i;
 			transposition_hash[transposition_table_index].j = (byte)j;
+			transposition_hash[transposition_table_index].flag = flag;
 		}
 	}
 	

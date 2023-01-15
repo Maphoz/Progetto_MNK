@@ -92,13 +92,15 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		if (FC.length == 1)
 			return FC[0];
 		else {
-			for (int k = 0; k < FC.length; k++) {
-				if (myBoard.markCell(FC[k].i, FC[k].j) == winCondition)
-					return FC[k];
-				else {
-					if (myBoard.markCell(FC[(k+1)%FC.length].i, FC[(k+1)%FC.length].j) == losCondition) {
+			for (int z = 0; z < FC.length; z++) {
+				if (myBoard.markCell(FC[z].i, FC[z].j) == winCondition)
+					return FC[z];
+				else if (!enemyWin){
+					MNKGameState state;
+					state = myBoard.markCell(FC[(z+1)%FC.length].i, FC[(z+1)%FC.length].j);
+					if (state == losCondition) {
 						enemyWin = true;
-						enemy_winning = FC[(k+1)%FC.length];
+						enemy_winning = FC[(z+1)%FC.length];
 						myBoard.unmarkCell();
 						myBoard.unmarkCell();
 					}

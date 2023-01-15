@@ -14,7 +14,7 @@ public class alphabeta{
 	Transposition_table TT;
 	long key;
 	long startingTime;
-	int time_span = 500;
+	int time_span = 800;
 	int depth_span = 1;
 	int starting_depth = 1;
 	
@@ -43,9 +43,9 @@ public class alphabeta{
 	
 	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
 		this.key = key;
-		
 		int depth = starting_depth;
 		startingTime = startTime;
+		
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
 		if(killer.deep_enough(distance_from_root)) {
@@ -54,27 +54,36 @@ public class alphabeta{
 		
 		
 		MNKCell previousBestCell = FC[0];
-		int previousBestValue;
 		memory history;
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
 			System.out.println("ho salvato qualcosa!");
-			previousBestValue = history.score;
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
 			System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " tempCell: " + tempCell.i + " " + tempCell.j);
-			depth = history.depth + 1;
+			if (history.incompleteLevel)
+				depth = history.depth - 1;
+			else
+				depth = history.depth;
 		}
+		
 		
 		System.out.println("parto a fare l'iterative deepening a partire dalla depth: " + depth);
 
+		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
-		while (!outOfTime() && depth < maxDepth + 1) {
+		boolean allEvalEqual = true;
+		int calculatedMoves = 0;
+		
+		while (!outOfTime() && depth < maxDepth) {
 			System.out.println("Sto facendo iterative a depth: " + depth);
-			int best_value = Integer.MIN_VALUE;
 			previousEvaluated = false;
+			allEvalEqual = true;
 			selected_cell = FC[0];
+			int best_value = Integer.MIN_VALUE;
+			int alpha = best_value;
+			int beta = Integer.MAX_VALUE;
 			for (int i = 0; i< size; i++) {
 				MNKCell d = FC[i];
 				board.markCell(d.i, d.j);					
@@ -84,40 +93,47 @@ public class alphabeta{
 					key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 					board.unmarkCell();								//remove the cell and iterate again
 			    	eval.removeSymbol(d.i, d.j, true);
+			    	calculatedMoves = i;
 					break;
 				}
 				if (d.i == previousBestCell.i && d.j == previousBestCell.j) {
 					previousEvaluated = true;
 				}
-				int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval);
-				//System.out.println("La mossa: " + d.i + " " + d.j + " ha dato valutazione: " + value);
+				int value = min(board, alpha, beta, depth, distance_from_root + 1, eval);
 				if (value == best_value){
 					selected_cell = smartestCell(selected_cell, d);
 				}
 				else if (value > best_value){
 					selected_cell = d;
 					best_value = value;
+					if (allEvalEqual && i > 0)
+						allEvalEqual = false;
 				}
+				else
+					if (allEvalEqual && i > 0)
+						allEvalEqual = false;
+				alpha = Math.max(alpha, value);
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 				board.unmarkCell();								//remove the cell and iterate again
 		    	eval.removeSymbol(d.i, d.j, true);
+		    	if (alpha >= beta)
+		    		break;
 			}
 			if (outOfTime()) {
 				if (!previousEvaluated) {
-					if (best_value < eval.MAX_EVALUATION) {
+					if (allEvalEqual || calculatedMoves < size/4) {
 						selected_cell = previousBestCell;
 					}
 				}
 				else {
-					if (best_value == eval.MIN_EVALUATION && best_value == eval.MAX_EVALUATION) {
+					if (allEvalEqual && (best_value == eval.MIN_EVALUATION || best_value == eval.MAX_EVALUATION)) {
 						selected_cell = previousBestCell;
 					}
 				}
 				break;
 			}
-			if (best_value != eval.MIN_EVALUATION && best_value != eval.MAX_EVALUATION) {
+			if (!allEvalEqual || (allEvalEqual && best_value != eval.MIN_EVALUATION &&  best_value != eval.MAX_EVALUATION)) {
 				previousBestCell = selected_cell;
-				previousBestValue = best_value;
 			}
 			depth += depth_span;
 		}
@@ -162,22 +178,22 @@ public class alphabeta{
 			eval.addSymbol(d.i, d.j, true);
 			key = TT.generate_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			if (state == wCond) {							//if it is a winning cell, return the best evaluation
-				//TT.save_data(eval.MAX_EVALUATION, key, depth);
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				//TT.save_data(eval.MAX_EVALUATION, key, depth, d.i, d.j, false);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				return eval.MAX_EVALUATION;
 			}
 			if (state == MNKGameState.DRAW) {				//if it is a drawing cell, return the null evaluation
-				//TT.save_data(0, key, depth);
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
+				//TT.save_data(0, key, depth, d.i, d.j, false);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				return 0;
 			}
 			if (outOfTime()) {
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				//TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
+				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, true);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				break;
@@ -193,7 +209,7 @@ public class alphabeta{
 			
 			if (i == lenght-1){
 				//System.out.println("Sono nella chiamata max e sto salvando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
+				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, false);
 			}
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, true);
@@ -205,7 +221,7 @@ public class alphabeta{
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
 				//System.out.println("Sono nella chiamata max e sto prunando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j);
+				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, false);
 				break;
 			}
 			else {
@@ -215,8 +231,10 @@ public class alphabeta{
 				
 			}
 		}
-		
-		return maxValue;
+		if (maxValue != Integer.MIN_VALUE)
+			return maxValue;
+		else
+			return eval.MIN_EVALUATION;
 	}
 	
 	
@@ -232,9 +250,9 @@ public class alphabeta{
 		if(killer.deep_enough(distance_from_root))
 			killer.move_ordering(FC, lenght, distance_from_root);
 		MNKGameState state;
-		MNKCell bestCell = FC[0];
+		//MNKCell bestCell = FC[0];
 		int minValue = Integer.MAX_VALUE;
-		long bestKey = 0;
+		//long bestKey = 0;
 		for (int i = 0; i< lenght; i++) {
 			MNKCell d = FC[i];
 			//System.out.println("Sto testando la cella: " + d.i + " " + d.j);
@@ -265,14 +283,15 @@ public class alphabeta{
 			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1, eval);
 			key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
 			if (value < minValue) {
-				bestCell = d;
+				//bestCell = d;
 				minValue = value;
-				bestKey = key;
+				//bestKey = key;
 			}
 			beta = Math.min(beta, minValue);
-			
+			/*
 			if (i == lenght - 1)
 				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
+			*/
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, false);
 			if (alpha >= beta) { 
@@ -283,7 +302,7 @@ public class alphabeta{
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
 				//System.out.println("Sono nella chiamata max e sto prunando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
+				//TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
 				break;
 			}
 			else {
@@ -294,7 +313,10 @@ public class alphabeta{
 			}
 		}
 		//System.out.println("A depth: " + depth + " ho trovato che la miglior mossa e: " + bestCell.i + " " + bestCell.j);
-		return minValue;
+		if (minValue != Integer.MAX_VALUE)
+			return minValue;
+		else
+			return eval.MAX_EVALUATION;
 	}
 	
 	protected boolean outOfTime() {
