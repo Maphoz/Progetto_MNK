@@ -57,10 +57,10 @@ public class alphabeta{
 		memory history;
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
-			System.out.println("ho salvato qualcosa!");
+			System.out.println("ho preso lo score!");
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
-			System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " tempCell: " + tempCell.i + " " + tempCell.j);
+			System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j);
 			if (history.incompleteLevel)
 				depth = history.depth - 1;
 			else
@@ -169,7 +169,7 @@ public class alphabeta{
 		}
 		MNKGameState state;
 		MNKCell bestCell = FC[0];
-		long bestKey = 0;
+		
 		int maxValue = Integer.MIN_VALUE;
 		for (int i = 0; i< lenght; i++) {
 			MNKCell d = FC[i];
@@ -193,7 +193,7 @@ public class alphabeta{
 			}
 			if (outOfTime()) {
 				key = TT.undo_key(key, d.i, d.j, board.cellState(d.i, d.j));
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, true);
+				TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, true);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				break;
@@ -203,13 +203,13 @@ public class alphabeta{
 			if (value > maxValue) {
 				bestCell = d;
 				maxValue = value;
-				bestKey = key;
+				
 			}
 			alpha = Math.max(alpha, maxValue);
 			
 			if (i == lenght-1){
 				//System.out.println("Sono nella chiamata max e sto salvando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, false);
+				TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
 			}
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, true);
@@ -221,7 +221,7 @@ public class alphabeta{
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
 				//System.out.println("Sono nella chiamata max e sto prunando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				TT.save_data(maxValue, bestKey, depth, bestCell.i, bestCell.j, false);
+				TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
 				break;
 			}
 			else {
@@ -252,7 +252,7 @@ public class alphabeta{
 		MNKGameState state;
 		//MNKCell bestCell = FC[0];
 		int minValue = Integer.MAX_VALUE;
-		//long bestKey = 0;
+		
 		for (int i = 0; i< lenght; i++) {
 			MNKCell d = FC[i];
 			//System.out.println("Sto testando la cella: " + d.i + " " + d.j);

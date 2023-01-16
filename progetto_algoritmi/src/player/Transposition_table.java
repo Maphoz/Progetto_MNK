@@ -8,7 +8,8 @@ public class Transposition_table {
 	private class transposition_hash_cell {
 		public short score;
 		public short depth;     //sarebbe la distanza dalle foglie e serve a capire se dobbiamo prendere il valore nella cella della TT o se � scarso, impreciso e lo dobbiamo ricalcolare
-		public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
+		//public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
+		public long mask_key;
 		public byte i;
 		public byte j;
 		public boolean flag;
@@ -107,7 +108,7 @@ public class Transposition_table {
 		memory mem;
 		if(transposition_hash[transposition_table_index].depth >= depth) {
 			
-			if(transposition_hash[transposition_table_index].mask_key == (short) key) { //le collisioni dovute alla maschera sono estremamente basse
+			if(transposition_hash[transposition_table_index].mask_key == /*(short)*/ key) { //le collisioni dovute alla maschera sono estremamente basse
 				mem = new memory((int)transposition_hash[transposition_table_index].score, (int)transposition_hash[transposition_table_index].i, (int)transposition_hash[transposition_table_index].j, (int)transposition_hash[transposition_table_index].depth, transposition_hash[transposition_table_index].flag);
 				return mem;
 			}
@@ -142,15 +143,18 @@ public class Transposition_table {
 		/*if(transposition_table_index==ScoreNotFound) {
 			return;
 		}*/
-		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
-			//System.out.println("ho salvato a depth " + depth + " la cella " + i + " " + j);
-			transposition_hash[transposition_table_index].score=(short)score;
-			transposition_hash[transposition_table_index].depth=(short)depth;
-			transposition_hash[transposition_table_index].mask_key=(short)key; 
-			transposition_hash[transposition_table_index].i = (byte)i;
-			transposition_hash[transposition_table_index].j = (byte)j;
-			transposition_hash[transposition_table_index].flag = flag;
+		if(depth>3) {
+			if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
+				System.out.println("ho salvato a depth " + depth + " la cella " + i + " " + j);
+				transposition_hash[transposition_table_index].score=(short)score;
+				transposition_hash[transposition_table_index].depth=(short)depth;
+				transposition_hash[transposition_table_index].mask_key=/*(short)*/key; 
+				transposition_hash[transposition_table_index].i = (byte)i;
+				transposition_hash[transposition_table_index].j = (byte)j;
+				transposition_hash[transposition_table_index].flag = flag;
+			}
 		}
+		
 	}
 	
 	public boolean are_transpositions(MNKCellState[][] A, MNKCellState[][] B, int M, int N){
