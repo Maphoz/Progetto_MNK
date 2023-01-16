@@ -625,6 +625,7 @@ public class EvaluationTool {
 			myThreats[index]++;
 		else
 			enemyThreats[index]++;
+		//commento a caso per far eun push
 	}
 	
 	
