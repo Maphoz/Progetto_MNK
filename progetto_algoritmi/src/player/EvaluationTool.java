@@ -86,7 +86,7 @@ public class EvaluationTool {
 						return MAX_EVALUATION;
 					}
 				}
-				else if (row_symbols.get(i)[0] >= k-2) {
+				else if (row_symbols.get(i)[0] == k-2) {
 					countRowSequence(board, mySymb, false, i, myThreats);
 					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
@@ -98,7 +98,7 @@ public class EvaluationTool {
 						return MIN_EVALUATION;
 					}
 				}
-				else if (row_symbols.get(i)[1] >= k-2) {
+				else if (row_symbols.get(i)[1] == k-2) {
 					countRowSequence(board, enemySymb, false, i, enemyThreats);
 					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
@@ -116,7 +116,7 @@ public class EvaluationTool {
 						return MAX_EVALUATION;
 					}
 				}
-				else if (col_symbols.get(i)[0] >= k-2) {
+				else if (col_symbols.get(i)[0] == k-2) {
 					countColSequence(board, mySymb, false, i, myThreats);
 					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
@@ -128,7 +128,7 @@ public class EvaluationTool {
 						return MIN_EVALUATION;
 					}
 				}
-				else if (col_symbols.get(i)[1] >= k-2) {
+				else if (col_symbols.get(i)[1] == k-2) {
 					countColSequence(board, enemySymb, false, i, enemyThreats);
 					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
@@ -569,6 +569,7 @@ public class EvaluationTool {
 	
 	public void addSymbol(int row, int col, boolean my_move) {
 		if (my_move) {
+			//System.out.println("Io gioco " + row + " " + col);
 			if (!row_symbols.containsKey(row)) {
 				row_symbols.put(row, new int[] {0, 0});
 			}
@@ -581,6 +582,7 @@ public class EvaluationTool {
 		}
 		
 		else {
+			//System.out.println("Lui gioco " + row + " " + col);
 			if (!row_symbols.containsKey(row)) {
 				row_symbols.put(row, new int[] {0, 0});
 			}
@@ -596,10 +598,12 @@ public class EvaluationTool {
 	
 	public void removeSymbol(int row, int col, boolean my_move) {
 		if (my_move) {
+			//System.out.println("Io tolgo " + row + " " + col);
 			row_symbols.get(row)[0]--;
 			col_symbols.get(col)[0]--;
 		}
 		else {
+			//System.out.println("lui tolgo " + row + " " + col);
 			row_symbols.get(row)[1]--;
 			col_symbols.get(col)[1]--;
 		}
@@ -621,16 +625,17 @@ public class EvaluationTool {
 			myThreats[index]++;
 		else
 			enemyThreats[index]++;
+		//commento a caso per far eun push
 	}
 	
 	
 	
 	//computes the number of threats * evaluation
 	protected int threatCalculation(boolean myTurn) {
-		if (myTurn && (enemyThreats[k1OpenIndex] > 0 || enemyThreats[k1SopenIndex] > 1))
+		if (myTurn && (enemyThreats[k1OpenIndex] > 0 || enemyThreats[k1SopenIndex] > 1) && (myThreats[k1OpenIndex] + myThreats[k1SopenIndex] == 0))
 			return MIN_EVALUATION;
 		
-		if (!myTurn && (myThreats[k1OpenIndex] > 0 || myThreats[k1SopenIndex] > 1))
+		if (!myTurn && (myThreats[k1OpenIndex] > 0 || myThreats[k1SopenIndex] > 1) && (enemyThreats[k1OpenIndex] + enemyThreats[k1SopenIndex] == 0))
 			return MAX_EVALUATION;
 		int eval = 0;
 		for (int i = 0; i < MAX_THREATS; i++) {

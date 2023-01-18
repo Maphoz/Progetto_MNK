@@ -6,6 +6,7 @@ import java.util.*;
 import mnkgame.MNKBoard;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
+import mnkgame.MNKCellState;
 
 
 public class MNKPlayer implements mnkgame.MNKPlayer {
@@ -24,6 +25,8 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 	int M;  //righe
 	int N;  //colonne
 	public static int threatBoard[][];
+	public static MNKCellState ourState;
+	public static MNKCellState enemyState;
 	
 
 	public void initPlayer(int M, int N, int K, boolean first, int timeout_in_secs) {
@@ -31,9 +34,9 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		this.N = N;
 		this.key = (long)0;
 		distance_from_root = 0;
-		this.TT = new Transposition_table(M,N);
+		
 		this.killer = new killer_heuristic(M,N, K);
-		TT.initTableRandom();
+		
 		rand = new Random(System.currentTimeMillis()); 
 		FirstTurn=true;
 		myBoard = new MNKBoard (M, N, K);
@@ -45,11 +48,17 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		if (first) {
 			winCondition = MNKGameState.WINP1;
 			losCondition = MNKGameState.WINP2;
+			ourState = MNKCellState.P1;
+			enemyState = MNKCellState.P2;
 		}
 		else {
 			winCondition = MNKGameState.WINP2;
 			losCondition = MNKGameState.WINP1;
+			ourState = MNKCellState.P2;
+			enemyState = MNKCellState.P1;
 		}
+		this.TT = new Transposition_table(M,N);
+		TT.initTableRandom();
 		//instance of the alphabeta class to solve the problem
 		solver = new alphabeta(winCondition, losCondition, first);
 		eval = new EvaluationTool(M, N, K, first);
@@ -69,9 +78,11 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		//adding to my board representation the last move played by the opponent
 		if (MC.length != 0) {
+			
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
 			eval.addSymbol(MC[MC.length - 1].i, MC[MC.length - 1].j, false);
-			key = TT.generate_key(key, MC[MC.length - 1].i, MC[MC.length - 1].j, MC[MC.length - 1].state);
+			key = TT.generate_key(key, MC[MC.length - 1].i, MC[MC.length - 1].j, enemyState);
+			//System.out.println("chiave con mossa fatta dall'avversario " + key + " con numero random " + TT.getStorage(MC[MC.length - 1].i, MC[MC.length - 1].j, enemyState));
 		}
 		
 		
@@ -79,12 +90,11 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			MNKCell selected_move = center(FC, FC.length, M, N);
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
-			key = TT.generate_key(key, selected_move.i, selected_move.j, myBoard.cellState(selected_move.i, selected_move.j));
+			key = TT.generate_key(key, selected_move.i, selected_move.j, ourState);
 			solver.firstIterative(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 			FirstTurn = false;
 			return selected_move;
 		}
-		
 		
 		//checking if there are any winning or losing moves
 		MNKCell enemy_winning = FC[0];
@@ -95,10 +105,8 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			for (int z = 0; z < FC.length; z++) {
 				if (myBoard.markCell(FC[z].i, FC[z].j) == winCondition)
 					return FC[z];
-				else if (!enemyWin){
-					MNKGameState state;
-					state = myBoard.markCell(FC[(z+1)%FC.length].i, FC[(z+1)%FC.length].j);
-					if (state == losCondition) {
+				else{
+					if (myBoard.markCell(FC[(z+1)%FC.length].i, FC[(z+1)%FC.length].j) == losCondition) {
 						enemyWin = true;
 						enemy_winning = FC[(z+1)%FC.length];
 						myBoard.unmarkCell();
@@ -114,15 +122,17 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		if (enemyWin) {
 			myBoard.markCell(enemy_winning.i, enemy_winning.j);
 			eval.addSymbol(enemy_winning.i, enemy_winning.j, true);
-			key = TT.generate_key(key, enemy_winning.i, enemy_winning.j, myBoard.cellState(enemy_winning.i, enemy_winning.j));
+			key = TT.generate_key(key, enemy_winning.i, enemy_winning.j, ourState);
 			return enemy_winning;
 		}
-		
+
 		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
-		
+
+		//System.out.println("chiave prima di aver giocato la mossa: " + key);
 		myBoard.markCell(bestCell.i, bestCell.j);
 		eval.addSymbol(bestCell.i, bestCell.j, true);
-		key = TT.generate_key(key, bestCell.i, bestCell.j, myBoard.cellState(bestCell.i, bestCell.j));
+		key = TT.generate_key(key, bestCell.i, bestCell.j, ourState);
+		//System.out.println("chiave dopo aver giocato la mossa: " + key +" con numero random " + TT.getStorage(bestCell.i, bestCell.j, ourState));
 		return bestCell;
 	}
 

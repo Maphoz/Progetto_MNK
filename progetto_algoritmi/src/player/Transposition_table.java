@@ -8,8 +8,8 @@ public class Transposition_table {
 	private class transposition_hash_cell {
 		public short score;
 		public short depth;     //sarebbe la distanza dalle foglie e serve a capire se dobbiamo prendere il valore nella cella della TT o se � scarso, impreciso e lo dobbiamo ricalcolare
-		//public short mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
-		public long mask_key;
+		public long mask_key;  // questa funge da maschera per la chiave long, le collisioni sono bassissime, tipo 3% in configurazione 10 10 7 o anche meno di 3%, anche 0.5%
+
 		public byte i;
 		public byte j;
 		public boolean flag;
@@ -28,11 +28,15 @@ public class Transposition_table {
 	//protected final int max_ispezione;
 	protected int M;
 	protected int N;
+	//protected MNKCellState ourState;
+	//protected MNKCellState enemyState;
 	protected long[][][] storage;//deve essere una matrice tridimensionale
 	protected transposition_hash_cell[] transposition_hash;    //l'hash table � 2^16, da inizializzare con tutti i campi val a -2 o comunque un valore per far capire che quella cella � vuota
 
 	public Transposition_table(int M, int N){
-		hash_size = (int)Math.pow(2,8);  //dimensione della tabella hash 
+		//this.ourState=MNKPlayer.ourState;
+		//this.enemyState = MNKPlayer.enemyState;
+		hash_size = (int)Math.pow(2,22);  //dimensione della tabella hash 
 		//max_ite = 50;  //n_max_iterazioni prima di ritornare ScoreNotFound nella ricerca della transposition_hash per trovare un Game_State uguale 
 		//max_ispezione = 60;
 		ScoreNotFound = -10; //indica se quando Osama controlla se e' presente nella transposition_hash lo score , non lo trova
@@ -108,7 +112,7 @@ public class Transposition_table {
 		memory mem;
 		if(transposition_hash[transposition_table_index].depth >= depth) {
 			
-			if(transposition_hash[transposition_table_index].mask_key == /*(short)*/ key) { //le collisioni dovute alla maschera sono estremamente basse
+			if(transposition_hash[transposition_table_index].mask_key == key) { //le collisioni dovute alla maschera sono estremamente basse
 				mem = new memory((int)transposition_hash[transposition_table_index].score, (int)transposition_hash[transposition_table_index].i, (int)transposition_hash[transposition_table_index].j, (int)transposition_hash[transposition_table_index].depth, transposition_hash[transposition_table_index].flag);
 				return mem;
 			}
@@ -143,16 +147,14 @@ public class Transposition_table {
 		/*if(transposition_table_index==ScoreNotFound) {
 			return;
 		}*/
-		if(depth>3) {
-			if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
-				System.out.println("ho salvato a depth " + depth + " la cella " + i + " " + j);
-				transposition_hash[transposition_table_index].score=(short)score;
-				transposition_hash[transposition_table_index].depth=(short)depth;
-				transposition_hash[transposition_table_index].mask_key=/*(short)*/key; 
-				transposition_hash[transposition_table_index].i = (byte)i;
-				transposition_hash[transposition_table_index].j = (byte)j;
-				transposition_hash[transposition_table_index].flag = flag;
-			}
+		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
+			//System.out.println("ho salvato a depth " + depth + " la cella " + i + " " + j);
+			transposition_hash[transposition_table_index].score=(short)score;
+			transposition_hash[transposition_table_index].depth=(short)depth;
+			transposition_hash[transposition_table_index].mask_key= key; 
+			transposition_hash[transposition_table_index].i = (byte)i;
+			transposition_hash[transposition_table_index].j = (byte)j;
+			transposition_hash[transposition_table_index].flag = flag;
 		}
 		
 	}
@@ -230,6 +232,19 @@ public class Transposition_table {
 			return(sim0rot180 || sim1rot0 || sim1rot180);
 		}
 	}
+	
+	//----
+	public long getStorage(int x, int y, MNKCellState p){ //y colonne e x le righe, genera la chiave relativa a una cella, la radice ha father_key_hash=(long)0
+		if(p == MNKCellState.P1){
+			return storage[0][x][y];
+			}
+		if (p == MNKCellState.P2){
+			return storage[1][x][y];
+			}	
+		System.out.println(" errore ");
+		return storage[1][x][y];
+    }
+	//---
 	
 }
 

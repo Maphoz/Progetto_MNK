@@ -1,7 +1,9 @@
 package player;
 import mnkgame.MNKBoard;
 
+
 import mnkgame.MNKCell;
+import mnkgame.MNKCellState;
 import mnkgame.MNKGameState;
 import player.killer_heuristic;
 import player.killer_heuristic.killer_cell;
@@ -9,7 +11,49 @@ import player.killer_heuristic.killer_cell;
 public class main {
 
 	public static void main(String[] args) {
-	
+		
+		Transposition_table TT = new Transposition_table(20,20);
+		TT.initTableRandom();
+		long key = 0;
+		MNKCellState c = MNKCellState.P2;
+		MNKCellState d = MNKCellState.P1;
+		
+		//key = TT.generate_key(key, 2, 2, c);
+		long[] arrayKey = new long[401];
+		int size = 0;
+		int counter = 0;
+		for(int i = 0; i<5; i++) {
+			for(int j = 0; j< 5; j++) {
+				arrayKey[counter]= key;
+				key = TT.generate_key(key, i, j, c);
+				size++;
+				counter++;
+				for(int h=0; h<size; h++) {
+					for(int k=0; k<size; k++) {
+						if(h!=k) {
+							System.out.println(arrayKey[h]==arrayKey[k]);
+						}
+						
+					}
+					
+				}	
+			}
+		}
+		
+		System.out.println(key);
+		for(int i = 4; i>=0; i--) {
+			for(int j = 4; j>=0; j--) {
+				key = TT.generate_key(key, i, j, c);
+			}
+		}
+		System.out.println(key);
+		
+		//key = TT.generate_key(key, 3, 3, c);
+		
+		
+		//System.out.println(key);
+		
+		
 		/*//System.out.println(k.killerMoves[3].size());
 		MNKCell c = new MNKCell(1, 1);
 		MNKCell d = new MNKCell(0, 0);
