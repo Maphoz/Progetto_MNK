@@ -10,12 +10,12 @@ import mnkgame.MNKCell;
 
 public class killer_heuristic {
 	
-	public class killer_cell {
-		public int weight;
-		public MNKCell killer_move;
-		public killer_cell(){	
+	protected class killer_cell {
+		protected int weight;
+		protected MNKCell killer_move;
+		protected killer_cell(){	
 		}
-		public void insert(MNKCell move, int weight) {
+		protected void insert(MNKCell move, int weight) {
 			this.weight = weight;
 			killer_move = move;			
 		}
@@ -78,7 +78,7 @@ public class killer_heuristic {
 		}
 		adjust_weight(distance_from_root);
 	}
-	public void adjust_weight(int distance_from_root) {
+	private void adjust_weight(int distance_from_root) {
 		
 		for(int i=0; i<size[distance_from_root]; i++) {
 			for(int j=0; j<size[distance_from_root]; j++) {
@@ -120,14 +120,14 @@ public class killer_heuristic {
 	
 	
 	
-	public void swapFC(MNKCell FC[], int index_a, int index_b) {
+	private void swapFC(MNKCell FC[], int index_a, int index_b) {
 		if(index_a == index_b)
 			return;
 		MNKCell tmp = FC[index_a];
 		FC[index_a] = FC[index_b];
 		FC[index_b] = tmp;
 	}
-	public void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b) {
+	private void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b) {
 		killer_cell tmp = killerMoves[index_a];
 		killerMoves[index_a] = killerMoves[index_b];
 		killerMoves[index_b] = tmp;
@@ -142,7 +142,7 @@ public class killer_heuristic {
 		}
 	}
 	
-	public boolean myEqual(MNKCell a, MNKCell b) {
+	private boolean myEqual(MNKCell a, MNKCell b) {
 		if(a.i==b.i && a.j==b.j)
 			return true;
 		else return false;

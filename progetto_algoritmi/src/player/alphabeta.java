@@ -47,13 +47,6 @@ public class alphabeta{
 		int depth = starting_depth;
 		startingTime = startTime;
 		
-		//pre-ordering moves through killer heuristic
-		int size = FC.length;
-		if(killer.deep_enough(distance_from_root)) {
-			killer.move_ordering(FC, size, distance_from_root);
-		}
-		
-		
 		MNKCell previousBestCell = FC[0];
 		memory history;
 		//System.out.println("Sto cercando qualcosa con key: " + key);
@@ -62,6 +55,9 @@ public class alphabeta{
 			System.out.println("ho preso lo score!");
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
+			if(killer.deep_enough(history.distance_from_root)) {
+				killer.insert_KM(previousBestCell, -4, history.distance_from_root);          //inserisco la previousBestCell nelle mosse killer, metto -4 perchè è molto forte rispetto a una semplice mossa che fa pruning
+			}
 			//System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " score: " + history.score);
 			if (history.incompleteLevel)
 				depth = history.depth - 1;
@@ -69,8 +65,12 @@ public class alphabeta{
 				depth = history.depth;
 		}
 		
-		//System.out.println("parto a fare l'iterative deepening a partire dalla depth: " + depth);
-
+		//pre-ordering moves through killer heuristic
+		int size = FC.length;
+		if(killer.deep_enough(distance_from_root)) {
+			killer.move_ordering(FC, size, distance_from_root);
+		}
+		
 		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
@@ -89,10 +89,7 @@ public class alphabeta{
 				MNKCell d = FC[i];
 				board.markCell(d.i, d.j);					
 				eval.addSymbol(d.i, d.j, true);
-				//System.out.println("sto generando la chiave nel for, chiave prima di GK " + key );
 				key = TT.generate_key(key, d.i, d.j, MNKPlayer.ourState);
-				//System.out.println("ho generato la chiave nel for, chiave: " + key + "con mossa " + d.i + " " + d.j + " " + " con numero random " + TT.getStorage(d.i, d.j, MNKPlayer.ourState));
-				//System.out.println("sto testando, avendo già generato la chiave, la mossa " + d.i + " " + d.j + " ora faccio chiamata a min " + " con chiave " + key + " con numero random " + TT.getStorage(d.i, d.j, MNKPlayer.ourState));
 				int value = min(board, alpha, beta, depth, distance_from_root + 1, eval, true, key);
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.ourState);
 				if (outOfTime()) {
@@ -123,62 +120,34 @@ public class alphabeta{
 		    	if (alpha >= beta)
 		    		break;
 			}
-			//System.out.println("sono nel while e la mia selected cell è " + selected_cell.i + " " + selected_cell.j + " con chiave " + key + " e storage " + TT.getStorage(selected_cell.i, selected_cell.j, MNKPlayer.ourState));
 			if (outOfTime()) {
-				//System.out.println("Ho finito il tempo. previousBestCell : " + previousBestCell.i + " "+ previousBestCell.j + " Selected_cell: "+ selected_cell.i + " " + selected_cell.j);
 				if (!previousEvaluated) {
 					if (calculatedMoves < size/2) {
 						
 						selected_cell = previousBestCell;
-						//System.out.println("sono nel while e la mia selected cell è cambiata in  " + selected_cell.i + " " + selected_cell.j + " con chiave " + key + " e storage " + TT.getStorage(selected_cell.i, selected_cell.j, MNKPlayer.ourState));
 					}
 				}
 				else {
 					if (allEvalEqual && (best_value == eval.MIN_EVALUATION || best_value == eval.MAX_EVALUATION)) {
 						selected_cell = previousBestCell;
-						//System.out.println("sono nel while e la mia selected cell è cambiata in  " + selected_cell.i + " " + selected_cell.j + " con chiave " + key + " e storage " + TT.getStorage(selected_cell.i, selected_cell.j, MNKPlayer.ourState));
 					}
 				}
 				break;
 			}
 			if (!allEvalEqual || (allEvalEqual && best_value != eval.MIN_EVALUATION &&  best_value != eval.MAX_EVALUATION)) {
 				previousBestCell = selected_cell;
-				//System.out.println("sono nel while e la mia selected cell è cambiata in  " + selected_cell.i + " " + selected_cell.j + " con chiave " + key + " e storage " + TT.getStorage(selected_cell.i, selected_cell.j, MNKPlayer.ourState));
 			}
 			depth += depth_span;
 		}
-		//System.out.println("ho finito il while e la mia selected cell è cambiata in  " + selected_cell.i + " " + selected_cell.j + " con chiave " + key + " e storage " + TT.getStorage(selected_cell.i, selected_cell.j, MNKPlayer.ourState));
-		/*for(int i=0; i<size; i++) {
-			if(FC[i].i != selected_cell.i || FC[i].j != selected_cell.j) {
-				System.out.println("la mossa dell'avversario è " + FC[i].i + " " + FC[i].j + " con numero random " + TT.getStorage(FC[i].i, FC[i].j, MNKPlayer.enemyState));
-				long mykey = TT.generate_key(key, selected_cell.i, selected_cell.j, MNKPlayer.ourState);
-				System.out.println(" la mia chiave generata è " + mykey);
-				System.out.println("la chiave che genererebbe è " + TT.generate_key(mykey, FC[i].i, FC[i].j, MNKPlayer.enemyState));
-				}
-		}*/
-		//System.out.println("Sono arrivato fino a depth: " + depth);
+	
 		return selected_cell;
 	}
 	
 	
-	/*public int alphaBeta(MNKBoard board, int depth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, long key, EvaluationTool eval) {
-		this.key = key;
-		this.TT = TT;
-		this.killer = killer;
-
-		//the move is being tried by the player class, so we look for opponent best response
-		return min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root, eval);
-		//return NegaScoutmax(board, Integer.MAX_VALUE, Integer.MIN_VALUE, depth, distance_from_root, false);
-
-	}
-	*/
-	//---------
 	//ALPHABETA CON TT E KILLER
 	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval, boolean saveNode, long key) {
 		if(depth==0) {
 			int evaluation = eval.evaluation(board, true);
-			//TT.save_data(evaluation, key, depth);
-			//System.out.println("Evaluation: " + evaluation);
 			return evaluation;
 		}
 		
@@ -192,20 +161,17 @@ public class alphabeta{
 		int maxValue = Integer.MIN_VALUE;
 		for (int i = 0; i< lenght; i++) {
 			MNKCell d = FC[i];
-			//System.out.println("Sto testando la cella nella chiamata ricorsiva di max: " + d.i + " " + d.j);
 			state = board.markCell(d.i, d.j);	
 			eval.addSymbol(d.i, d.j, true);
 			key = TT.generate_key(key, d.i, d.j, MNKPlayer.ourState);
 			if (state == wCond) {							//if it is a winning cell, return the best evaluation
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.ourState);
-				//TT.save_data(eval.MAX_EVALUATION, key, depth, d.i, d.j, false);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				return eval.MAX_EVALUATION;
 			}
 			if (state == MNKGameState.DRAW) {				//if it is a drawing cell, return the null evaluation
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.ourState);
-				//TT.save_data(0, key, depth, d.i, d.j, false);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				return 0;
@@ -224,8 +190,7 @@ public class alphabeta{
 			alpha = Math.max(alpha, maxValue);
 			if (saveNode && i == lenght-1){
 				if (depth >= 3) {
-				//System.out.println("Io risponderei con: " + bestCell.i + " " + bestCell.j + " a depth " + depth + " con chiave " + key + " con numero random " + TT.getStorage(bestCell.i, bestCell.j, MNKPlayer.ourState)); 
-					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
+					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
 				}
 			}
 			board.unmarkCell();
@@ -235,11 +200,10 @@ public class alphabeta{
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
 				}
 				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
-					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
+					killer.change_weight(d, - 1, distance_from_root);  //mossa buona 
 				}
 				if (saveNode && depth >= 3) {
-					//System.out.println("pruning Io risponderei con: " + bestCell.i + " " + bestCell.j + " a depth " + depth + " con chiave " + key + " con numero random " + TT.getStorage(bestCell.i, bestCell.j, MNKPlayer.ourState));
-					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
+					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
 				}
 				break;
 			}
@@ -257,8 +221,6 @@ public class alphabeta{
 	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval, boolean saveNode, long key) {
 		if(depth==0) {
 			int evaluation = eval.evaluation(board, false);
-			//TT.save_data(evaluation, key, depth);
-			//System.out.println("Evaluation: " + evaluation);
 			return evaluation;
 		}
 		
@@ -267,27 +229,20 @@ public class alphabeta{
 		if(killer.deep_enough(distance_from_root))
 			killer.move_ordering(FC, lenght, distance_from_root);
 		MNKGameState state;
-		//MNKCell bestCell = FC[0];
 		int minValue = Integer.MAX_VALUE;
 		
 		for (int i = 0; i< lenght; i++) {
 			MNKCell d = FC[i];
-			//System.out.println("Sto testando la cella: " + d.i + " " + d.j);
 			state = board.markCell(d.i, d.j);
 			eval.addSymbol(d.i, d.j, false);
-			//System.out.println("sono in min e la chiave precedente è " + key);
 			key = TT.generate_key(key, d.i, d.j, MNKPlayer.enemyState);
-			//if (saveNode)
-			//	System.out.println("il nemico testa " + d.i + " " + d.j + " con chiave " + key + " con numero random " + TT.getStorage(d.i, d.j, MNKPlayer.enemyState));
 			if (state == lCond) {
-				//TT.save_data(eval.MIN_EVALUATION, key, depth);
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.enemyState);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
 				return eval.MIN_EVALUATION;
 			}
 			if (state == MNKGameState.DRAW) {
-				//TT.save_data(0, key, depth);
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.enemyState);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
@@ -301,15 +256,9 @@ public class alphabeta{
 				break;
 			}
 			if (value < minValue) {
-				//bestCell = d;
 				minValue = value;
-				//bestKey = key;
 			}
 			beta = Math.min(beta, minValue);
-			/*
-			if (i == lenght - 1)
-				TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
-			*/
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, false);
 			if (alpha >= beta) { 
@@ -317,10 +266,8 @@ public class alphabeta{
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
 				}
 				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
-					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
+					killer.change_weight(d, - 1, distance_from_root);  //mossa buona 
 				}
-				//System.out.println("Sono nella chiamata max e sto prunando la miglior cella per me: " + bestCell.i + " " + bestCell.j);
-				//TT.save_data(minValue, bestKey, depth, bestCell.i, bestCell.j);
 				break;
 			}
 			else {
@@ -330,7 +277,6 @@ public class alphabeta{
 				
 			}
 		}
-		//System.out.println("A depth: " + depth + " ho trovato che la miglior mossa e: " + bestCell.i + " " + bestCell.j);
 		return minValue;
 	}
 	
