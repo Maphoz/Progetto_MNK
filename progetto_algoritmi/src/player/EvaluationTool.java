@@ -9,7 +9,8 @@ public class EvaluationTool {
 	int k1OpenIndex = 0;
 	int k2OpenIndex = 1;
 	int k1SopenIndex = 2;
-	int threatsEval[];
+	int enemyThreatsEval[];
+	int myThreatsEval[];
 	int MAX_THREATS = 3;
 	public static int myThreats[];
 	public static int enemyThreats[];
@@ -34,14 +35,24 @@ public class EvaluationTool {
 	public EvaluationTool(int m, int n, int k, boolean first) {
 		this.k = k;
 		
-		//memorize if I'm p1 or p2
+		enemyThreatsEval = new int[MAX_THREATS];
+		myThreatsEval = new int[MAX_THREATS];
+		enemyThreatsEval[k1OpenIndex] = 5020;
+		enemyThreatsEval[k2OpenIndex] = 1300;
+		enemyThreatsEval[k1SopenIndex] = 2000;
 		if (first) {
 			mySymb = MNKCellState.P1;
 			enemySymb = MNKCellState.P2;
+			for (int i = 0; i < MAX_THREATS; i++){
+				myThreatsEval[i] = enemyThreatsEval[i];
+			}
 		}
 		else {
 			mySymb = MNKCellState.P2;
 			enemySymb = MNKCellState.P1;
+			myThreatsEval[k1OpenIndex] = 250;
+			myThreatsEval[k2OpenIndex] = 100;
+			myThreatsEval[k1SopenIndex] = 80;
 		}
 		
 		diagRow = new int[n];
@@ -53,11 +64,6 @@ public class EvaluationTool {
 		
 		//calculates which diagonals are interesting for us
 		diagonalCalculations(m, n, k);
-		
-		threatsEval = new int[MAX_THREATS];
-		threatsEval[k1OpenIndex] = 5020;
-		threatsEval[k2OpenIndex] = 2000;
-		threatsEval[k1SopenIndex] = 1300;
 		
 		myThreats = new int[MAX_THREATS];
 		enemyThreats = new int[MAX_THREATS];
@@ -263,7 +269,10 @@ public class EvaluationTool {
 							threats[k1SopenIndex]++;
 							z = j + 1;
 						}
-						else if (board.cellState(row, j) == MNKCellState.FREE) {
+						else if (board.cellState(row, j) == MNKCellState.FREE && symCount > 0) {
+							z = j - 1;
+						}
+						else if (board.cellState(row, j) == MNKCellState.FREE && symCount == 0){
 							z = j;
 						}
 						else {
@@ -353,7 +362,10 @@ public class EvaluationTool {
 							threats[k1SopenIndex]++;
 							z = j + 1;
 						}
-						else if (board.cellState(j, col) == MNKCellState.FREE) {
+						else if (board.cellState(j, col) == MNKCellState.FREE && symCount > 0) {
+							z = j - 1;
+						}
+						else if (board.cellState(j, col) == MNKCellState.FREE && symCount == 0){
 							z = j;
 						}
 						else {
@@ -637,10 +649,10 @@ public class EvaluationTool {
 		
 		if (!myTurn && (myThreats[k1OpenIndex] > 0 || myThreats[k1SopenIndex] > 1) && (enemyThreats[k1OpenIndex] + enemyThreats[k1SopenIndex] == 0))
 			return MAX_EVALUATION;
-		
+
 		int eval = 0;
 		for (int i = 0; i < MAX_THREATS; i++) {
-			eval = eval + (myThreats[i] - enemyThreats[i]) * threatsEval[i];
+			eval = eval + (myThreats[i] * myThreatsEval[i]) - (enemyThreats[i] * enemyThreatsEval[i]);
 		}
 		return eval;
 	}
