@@ -56,7 +56,7 @@ public class alphabeta{
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
 			if(killer.deep_enough(history.distance_from_root)) {
-				killer.insert_KM(previousBestCell, -4, history.distance_from_root);          //inserisco la previousBestCell nelle mosse killer, metto -4 perchè è molto forte rispetto a una semplice mossa che fa pruning
+				killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root);          //inserisco la previousBestCell nelle mosse killer, metto -4 perchè è molto forte rispetto a una semplice mossa che fa pruning
 			}
 			//System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " score: " + history.score);
 			if (history.incompleteLevel)

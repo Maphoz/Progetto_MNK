@@ -53,10 +53,22 @@ public class killer_heuristic {
 		killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
 		adjust_weight(distance_from_root);
 	}
-
-	public boolean is_a_KM(MNKCell move, int distance_from_root) {
+	
+	public int get_first_KM_weight(int distance_from_root) {
+		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;
+		if(size[distance_from_root]>0) {
+			return killerMoves[distance_from_root][0].weight - 1;
+		}
+		else {
+			return 1;
+		}
+		
+	}
+
+	public boolean is_a_KM(MNKCell move, int distance_from_root) {
+
 		distance_from_root = distance_from_root - decrement_distance_from_root;
 		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
 			distance_from_root = max_distance_from_root - 1;

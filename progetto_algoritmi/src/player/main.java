@@ -11,7 +11,11 @@ import player.killer_heuristic.killer_cell;
 public class main {
 
 	public static void main(String[] args) {
-		
+		int c = 1;
+		int d = 2;
+		boolean h = c>d;
+		System.out.println(h);
+		/*
 		Transposition_table TT = new Transposition_table(20,20);
 		TT.initTableRandom();
 		long key = 0;
@@ -47,7 +51,7 @@ public class main {
 			}
 		}
 		System.out.println(key);
-		
+		*/
 		//key = TT.generate_key(key, 3, 3, c);
 		
 		
