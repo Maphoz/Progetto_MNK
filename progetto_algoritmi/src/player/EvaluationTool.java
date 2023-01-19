@@ -637,6 +637,7 @@ public class EvaluationTool {
 		
 		if (!myTurn && (myThreats[k1OpenIndex] > 0 || myThreats[k1SopenIndex] > 1) && (enemyThreats[k1OpenIndex] + enemyThreats[k1SopenIndex] == 0))
 			return MAX_EVALUATION;
+		
 		int eval = 0;
 		for (int i = 0; i < MAX_THREATS; i++) {
 			eval = eval + (myThreats[i] - enemyThreats[i]) * threatsEval[i];
