@@ -34,9 +34,11 @@ public class alphabeta{
 		int depth = starting_depth;
 	
 		while (!outOfTime() && depth < maxDepth + 1) {
+			//System.out.println("sto facendo ID e sono a depth " + depth);
 			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval, true, key);
 			depth += depth_span;
 		}
+		//System.out.println("Sono arrivato fino a depth: " + depth);
 	}
 	
 	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
@@ -45,24 +47,31 @@ public class alphabeta{
 		int depth = starting_depth;
 		startingTime = startTime;
 		
+		MNKCell previousBestCell = FC[0];
+		memory history;
+		//System.out.println("Sto cercando qualcosa con key: " + key);
+		history = TT.gain_score(key, depth);
+		if (history.score != TT.ScoreNotFound) {
+			System.out.println("ho preso lo score!");
+			MNKCell tempCell = new MNKCell (history.i, history.j);
+			previousBestCell = tempCell;
+			if(killer.deep_enough(history.distance_from_root)) {
+				killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root);          //inserisco la previousBestCell nelle mosse killer, metto -4 perch� � molto forte rispetto a una semplice mossa che fa pruning
+			}
+			//System.out.println("Best cell: " + previousBestCell.i + " " + previousBestCell.j + " score: " + history.score);
+			if (history.incompleteLevel)
+				depth = history.depth - 1;
+			else
+				depth = history.depth;
+		}
+
+		//pre-ordering moves through killer heuristic
 		int size = FC.length;
 		if(killer.deep_enough(distance_from_root)) {
 			killer.move_ordering(FC, size, distance_from_root);
 		}
 		
-		
-		MNKCell previousBestCell = FC[0];
-		memory history;
-		history = TT.gain_score(key, depth);
-		if (history.score != TT.ScoreNotFound) {
-			System.out.println("ho preso lo score! A depth: " + history.depth);
-			MNKCell tempCell = new MNKCell (history.i, history.j);
-			previousBestCell = tempCell;
-			depth = history.depth - 1;
-		}
-		
-		System.out.println("La miglior cella e: " + previousBestCell.i + " " + previousBestCell.j);
-		
+		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
 		boolean allEvalEqual = true;
@@ -115,8 +124,8 @@ public class alphabeta{
 			if (outOfTime()) {
 				if (!previousEvaluated) {
 					if (calculatedMoves < size/2) {
-						
-						selected_cell = previousBestCell;}
+						selected_cell = previousBestCell;
+					}
 				}
 				else {
 					if (allEvalEqual && (best_value == eval.MIN_EVALUATION || best_value == eval.MAX_EVALUATION)) {
@@ -130,8 +139,12 @@ public class alphabeta{
 			}
 			depth += depth_span;
 		}
+
+	
 		return selected_cell;
 	}
+	
+
 	
 	//ALPHABETA CON TT E KILLER
 	protected int max(MNKBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval, boolean saveNode, long key) {
@@ -179,7 +192,7 @@ public class alphabeta{
 			alpha = Math.max(alpha, maxValue);
 			if (saveNode && i == lenght-1){
 				if (depth >= 3) {
-					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
+					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
 				}
 			}
 			board.unmarkCell();
@@ -189,10 +202,10 @@ public class alphabeta{
 					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
 				}
 				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
-					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
+					killer.change_weight(d, - 1, distance_from_root);  //mossa buona 
 				}
 				if (saveNode && depth >= 3) {
-					TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false);
+	                TT.save_data(maxValue, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
 				}
 				break;
 			}
@@ -294,16 +307,8 @@ public class alphabeta{
 		MNKGameState state;
 		int maxValue = Integer.MIN_VALUE;
 		for (MNKCell d: FC) {
-<<<<<<< HEAD
 			state = board.markCell(d.i, d.j);
 			eval.addSymbol(d.i, d.j, true);
-=======
-			state = board.markCell(d.i, d.j);	
-			if(depth==0) {
-				board.unmarkCell();
-				return 0;   //da mettere qua l'evaluation
-			}
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			if (state == wCond) {							//if it is a winning cell, return the best evaluation
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
@@ -314,44 +319,17 @@ public class alphabeta{
 				eval.removeSymbol(d.i, d.j, true);
 				return 0;
 			}
-<<<<<<< HEAD
 			int value = min(board, alpha, beta, eval);			//else recursive call and compare the evaluations
-=======
-			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1);			//else recursive call and compare the evaluations
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			maxValue = Math.max(value, maxValue);
 			alpha = Math.max(alpha, maxValue);
 			board.unmarkCell();
-<<<<<<< HEAD
 			eval.removeSymbol(d.i, d.j, true);
 			if (alpha >= beta) break;
-=======
-			if (alpha >= beta) { 
-				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root) ) {
-					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
-				}
-				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
-					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
-				}
-				break;
-			}
-			else {
-				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
-				}
-				
-			}
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		}
 		return maxValue;
 	}
 	
-<<<<<<< HEAD
 	protected int min(MNKBoard board, int alpha, int beta, EvaluationTool eval) {
-=======
-	protected int min(MNKBoard board, int alpha, int beta, int depth, int distance_from_root) {
-
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		MNKCell[] FC = board.getFreeCells();
 		int size = FC.length;
 		if(killer.deep_enough(distance_from_root))
@@ -360,14 +338,7 @@ public class alphabeta{
 		int minValue = Integer.MAX_VALUE;
 		for (MNKCell d: FC) {
 			state = board.markCell(d.i, d.j);
-<<<<<<< HEAD
 			eval.addSymbol(d.i, d.j, false);
-=======
-			if(depth==0) {
-				board.unmarkCell();
-				return 0;   //da mettere qua l'evaluation
-			}
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			if (state == lCond) {
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, false);
@@ -378,33 +349,12 @@ public class alphabeta{
 				eval.removeSymbol(d.i, d.j, false);
 				return 0;
 			}
-<<<<<<< HEAD
 			int value = max(board, alpha, beta, eval);
-=======
-			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1);
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 			minValue = Math.min(value, minValue);
 			beta = Math.min(beta, minValue);
 			board.unmarkCell();
-<<<<<<< HEAD
 			eval.removeSymbol(d.i, d.j, false);
 			if (alpha >= beta) break;
-=======
-			if (alpha >= beta) { 
-				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root)) {
-					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
-				}
-				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, - 1, distance_from_root);      //mossa buona
-				}
-				break;
-			}
-			else {
-				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
-					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
-				}
-			}
->>>>>>> branch 'master' of https://github.com/Maphoz/Progetto_MNK.git
 		}
 		return minValue;
 	}
