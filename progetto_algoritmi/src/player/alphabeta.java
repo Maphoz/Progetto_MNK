@@ -55,9 +55,12 @@ public class alphabeta{
 			System.out.println("ho preso lo score!" + history.i + " " + history.j);
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
-			if(killer.deep_enough(history.distance_from_root)) {
-				killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root);          //inserisco la previousBestCell nelle mosse killer, metto -4 perch� � molto forte rispetto a una semplice mossa che fa pruning
-			}
+			
+			killer.printKiller(history.distance_from_root);
+			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell nelle mosse killer, metto -4 perch� � molto forte rispetto a una semplice mossa che fa pruning
+			
+			killer.printKiller(history.distance_from_root);
+			
 			if (history.incompleteLevel)
 				depth = history.depth - 1;
 			else
@@ -65,9 +68,9 @@ public class alphabeta{
 		}
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
-		if(killer.deep_enough(distance_from_root)) {
-			killer.move_ordering(FC, size, distance_from_root);
-		}
+		killer.printFC(FC, size);
+		killer.move_ordering(FC, size, distance_from_root);
+		killer.printFC(FC, size);
 		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
@@ -161,9 +164,8 @@ public class alphabeta{
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
-		if(killer.deep_enough(distance_from_root)) {
-			killer.move_ordering(FC, lenght, distance_from_root);
-		}
+		killer.move_ordering(FC, lenght, distance_from_root);
+		
 		MNKGameState state;
 		MNKCell bestCell = FC[0];
 		for (int i = 0; i< lenght; i++) {
@@ -202,10 +204,10 @@ public class alphabeta{
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, true);
 			if (alpha >= beta) { 
-				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root) ) {
-					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
+				if(!killer.is_a_KM(d, distance_from_root) ) {
+					killer.insert_KM(d, 1, distance_from_root, false);          //inserisco la killer move
 				}
-				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
+				else if(killer.is_a_KM(d, distance_from_root) ) {
 					killer.change_weight(d, - 1, distance_from_root);  //mossa buona 
 				}
 				if (saveNode && depth >= 3) {
@@ -214,7 +216,7 @@ public class alphabeta{
 				break;
 			}
 			else {
-				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
+				if(killer.is_a_KM(d, distance_from_root)) {
 					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
 				}
 				
@@ -232,8 +234,7 @@ public class alphabeta{
 		
 		MNKCell[] FC = board.getFreeCells();
 		int lenght = FC.length;
-		if(killer.deep_enough(distance_from_root))
-			killer.move_ordering(FC, lenght, distance_from_root);
+		killer.move_ordering(FC, lenght, distance_from_root);
 		MNKGameState state;
 		//int minValue = Integer.MAX_VALUE;
 		
@@ -267,16 +268,16 @@ public class alphabeta{
 			board.unmarkCell();
 			eval.removeSymbol(d.i, d.j, false);
 			if (alpha >= beta) { 
-				if(killer.deep_enough(distance_from_root) && !killer.is_a_KM(d, distance_from_root) ) {
-					killer.insert_KM(d, 1, distance_from_root);          //inserisco la killer move
+				if(!killer.is_a_KM(d, distance_from_root) ) {
+					killer.insert_KM(d, 1, distance_from_root, false);          //inserisco la killer move
 				}
-				else if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root) ) {
+				else if(killer.is_a_KM(d, distance_from_root) ) {
 					killer.change_weight(d, - 1, distance_from_root);  //mpssa buona 
 				}
 				break;
 			}
 			else {
-				if(killer.deep_enough(distance_from_root) && killer.is_a_KM(d, distance_from_root)) {
+				if(killer.is_a_KM(d, distance_from_root)) {
 					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
 				}
 				

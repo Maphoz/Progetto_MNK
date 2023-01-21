@@ -17,19 +17,18 @@ public class killer_heuristic {
 		}
 		protected void insert(MNKCell move, int weight) {
 			this.weight = weight;
-			killer_move = move;			
+			killer_move = move;
 		}
 	}
 	protected killer_cell[][] killerMoves;
 	protected final int slot = 3;
 	protected final int max_distance_from_root;
-	protected final int decrement_distance_from_root; //sotto una certa soglia di distanza dalla radice non ci sono cut off 
 	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
+	protected final int max_negative_weight = -50;   //le mosse killer non possono scendere più in basso di questo valore, serve a risolvere il bug che c'erano mosse killer che avevano pesi tipo -1000
 	protected int[] size;
 
-	public killer_heuristic(int M, int N, int K) {
-		decrement_distance_from_root = K - 1;
-		max_distance_from_root = M*N - decrement_distance_from_root;
+	public killer_heuristic(int M, int N) {
+		max_distance_from_root = M*N + 1;
 		size = new int [max_distance_from_root];
 		killerMoves = new killer_cell[max_distance_from_root][slot];
 		for(int i=0;i<max_distance_from_root;i++){
@@ -39,25 +38,29 @@ public class killer_heuristic {
 			}
 		}
 	}
-	public void insert_KM(MNKCell move, int weight, int distance_from_root) {
-		distance_from_root = distance_from_root - decrement_distance_from_root;
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
-		if(size[distance_from_root]>=slot && killerMoves[distance_from_root][slot-1].weight<=weight_bound) {
+	public void insert_KM(MNKCell move, int weight, int distance_from_root, boolean ispreviousBestMove) {
+		if(size[distance_from_root]>=slot && killerMoves[distance_from_root][slot-1].weight<=weight_bound && !ispreviousBestMove) {
 			return;
 		}
 		killer_cell k_move = new killer_cell();
 		k_move.insert(move, weight); 
 		
-		size[distance_from_root]++;
-		killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
+		if(size[distance_from_root]<3)
+			size[distance_from_root]++;
+		
+		if(ispreviousBestMove && is_a_KM(move, distance_from_root)) {
+			for(int i=0; i<size[distance_from_root]; i++) {
+				if(myEqual(move,killerMoves[distance_from_root][i].killer_move) && i!=0)
+					swapKillerCell(killerMoves[distance_from_root], i, 0, true);
+			}
+		}
+		else
+			killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
+		
 		adjust_weight(distance_from_root);
 	}
 	
 	public int get_first_KM_weight(int distance_from_root) {
-		distance_from_root = distance_from_root - decrement_distance_from_root;
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
 		if(size[distance_from_root]>0) {
 			return killerMoves[distance_from_root][0].weight - 1;
 		}
@@ -68,10 +71,6 @@ public class killer_heuristic {
 	}
 
 	public boolean is_a_KM(MNKCell move, int distance_from_root) {
-
-		distance_from_root = distance_from_root - decrement_distance_from_root;
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
 		for(int i=0; i<size[distance_from_root]; i++) {
 			if(myEqual(move,killerMoves[distance_from_root][i].killer_move)) {
 				return true;
@@ -80,12 +79,12 @@ public class killer_heuristic {
 		return false;
 	}
 	public void change_weight(MNKCell move, int increment, int distance_from_root) { //l'incremento può essere pure negativo basta mettere il meno, più è basso il peso e più la killer move è forte
-		distance_from_root = distance_from_root - decrement_distance_from_root;
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
 		for(int i=0; i<size[distance_from_root]; i++) {
 			if(myEqual(move,killerMoves[distance_from_root][i].killer_move)) {
-				killerMoves[distance_from_root][i].weight = killerMoves[distance_from_root][i].weight + increment; 
+				if(increment>0)
+					killerMoves[distance_from_root][i].weight = killerMoves[distance_from_root][i].weight + increment; 
+				else if(killerMoves[distance_from_root][i].weight>max_negative_weight)
+					killerMoves[distance_from_root][i].weight = killerMoves[distance_from_root][i].weight + increment; 
 			}
 		}
 		adjust_weight(distance_from_root);
@@ -96,7 +95,7 @@ public class killer_heuristic {
 			for(int j=0; j<size[distance_from_root]; j++) {
 				
 				if(killerMoves[distance_from_root][i].weight>killerMoves[distance_from_root][j].weight && i<j) {
-					swapKillerCell(killerMoves[distance_from_root], i, j);
+					swapKillerCell(killerMoves[distance_from_root], i, j, false);
 				}
 			}
 		}
@@ -111,11 +110,6 @@ public class killer_heuristic {
 	
 	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {	
 		
-		if(distance_from_root<decrement_distance_from_root)
-			return ;
-		distance_from_root = distance_from_root - decrement_distance_from_root;
-		if(distance_from_root >=max_distance_from_root)              //non si sa mai, lo facciamo per non avere un OutOfBound
-			distance_from_root = max_distance_from_root - 1;
 		if(lenght<size[distance_from_root])
 			return;
 		int counter = 0;
@@ -139,12 +133,19 @@ public class killer_heuristic {
 		FC[index_a] = FC[index_b];
 		FC[index_b] = tmp;
 	}
-	private void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b) {
+	private void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b, boolean swapweight) {
+		int index_a_weight = killerMoves[index_a].weight;
+		int index_b_weight = killerMoves[index_b].weight;
 		killer_cell tmp = killerMoves[index_a];
 		killerMoves[index_a] = killerMoves[index_b];
 		killerMoves[index_b] = tmp;
+		if(swapweight) {
+			killerMoves[index_a].weight=index_a_weight;
+			killerMoves[index_b].weight=index_b_weight;
+		}
+		
 	}
-	
+	/*
 	public boolean deep_enough(int distance_from_root) {
 		if(distance_from_root>=decrement_distance_from_root) {
 			return true;
@@ -152,7 +153,7 @@ public class killer_heuristic {
 		else {
 			return false;
 		}
-	}
+	}*/
 	
 	private boolean myEqual(MNKCell a, MNKCell b) {
 		if(a.i==b.i && a.j==b.j)
@@ -160,6 +161,24 @@ public class killer_heuristic {
 		else return false;
 	}
 	
+	//-------
+	public void printFC(MNKCell FC[], int lenght) {
+		System.out.println("printo FC");
+		for(int i=0; i<5; i++) {
+			System.out.print(" " + FC[i] + " ");
+		}
+		System.out.println("___________________________");
+	}
+	public void printKiller(int distance) {
+		System.out.println("printo mosse killer");
+		for(int i=0; i<size[distance]; i++) {
+			System.out.print(" " + killerMoves[distance][i].killer_move + " con peso " + killerMoves[distance][i].weight + " ");
+		}
+		System.out.println("__________________");
+		
+	}
+	
+	//------
 	
 
 }

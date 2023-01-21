@@ -35,7 +35,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		this.key = (long)0;
 		distance_from_root = 0;
 		
-		this.killer = new killer_heuristic(M,N, K);
+		this.killer = new killer_heuristic(M,N);
 		
 		rand = new Random(System.currentTimeMillis()); 
 		FirstTurn=true;
