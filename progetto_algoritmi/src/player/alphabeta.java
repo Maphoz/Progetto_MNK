@@ -35,7 +35,7 @@ public class alphabeta{
 	
 		while (!outOfTime() && depth < maxDepth + 1) {
 			//System.out.println("sto facendo ID e sono a depth " + depth);
-			int value = min(board, Integer.MIN_VALUE, Integer.MAX_VALUE, depth, distance_from_root + 1, eval, true, key);
+			int value = min(board, eval.MIN_EVALUATION, eval.MAX_EVALUATION, depth, distance_from_root + 1, eval, true, key);
 			depth += depth_span;
 		}
 		//System.out.println("Sono arrivato fino a depth: " + depth);
@@ -82,8 +82,8 @@ public class alphabeta{
 			previousEvaluated = false;
 			allEvalEqual = true;
 			selected_cell = FC[0];
-			int alpha = Integer.MIN_VALUE;
-			int beta = Integer.MAX_VALUE;
+			int alpha = eval.MIN_EVALUATION;
+			int beta = eval.MAX_EVALUATION;
 			for (int i = 0; i< size; i++) {
 				MNKCell d = FC[i];
 				board.markCell(d.i, d.j);					
