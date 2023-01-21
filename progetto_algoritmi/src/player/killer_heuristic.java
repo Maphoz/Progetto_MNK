@@ -28,7 +28,7 @@ public class killer_heuristic {
 	protected int[] size;
 
 	public killer_heuristic(int M, int N) {
-		max_distance_from_root = M*N + 1;
+		max_distance_from_root = M*N + 5;
 		size = new int [max_distance_from_root];
 		killerMoves = new killer_cell[max_distance_from_root][slot];
 		for(int i=0;i<max_distance_from_root;i++){
@@ -38,6 +38,7 @@ public class killer_heuristic {
 			}
 		}
 	}
+
 	public void insert_KM(MNKCell move, int weight, int distance_from_root, boolean ispreviousBestMove) {
 		if(size[distance_from_root]>=slot && killerMoves[distance_from_root][slot-1].weight<=weight_bound && !ispreviousBestMove) {
 			return;
@@ -45,20 +46,21 @@ public class killer_heuristic {
 		killer_cell k_move = new killer_cell();
 		k_move.insert(move, weight); 
 		
-		if(size[distance_from_root]<3)
-			size[distance_from_root]++;
-		
-		if(ispreviousBestMove && is_a_KM(move, distance_from_root)) {
+		if(ispreviousBestMove && is_a_KM(move, distance_from_root)) {		
 			for(int i=0; i<size[distance_from_root]; i++) {
-				if(myEqual(move,killerMoves[distance_from_root][i].killer_move) && i!=0)
+				if(myEqual(move,killerMoves[distance_from_root][i].killer_move)) {
 					swapKillerCell(killerMoves[distance_from_root], i, 0, true);
+				}
+					
 			}
 		}
-		else
+		else {
+			size[distance_from_root]++;
 			killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
-		
+		}
 		adjust_weight(distance_from_root);
 	}
+
 	
 	public int get_first_KM_weight(int distance_from_root) {
 		if(size[distance_from_root]>0) {
@@ -134,6 +136,8 @@ public class killer_heuristic {
 		FC[index_b] = tmp;
 	}
 	private void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b, boolean swapweight) {
+		if(index_a == index_b)
+			return;
 		int index_a_weight = killerMoves[index_a].weight;
 		int index_b_weight = killerMoves[index_b].weight;
 		killer_cell tmp = killerMoves[index_a];
@@ -160,11 +164,13 @@ public class killer_heuristic {
 			return true;
 		else return false;
 	}
-	
+	/*
 	//-------
 	public void printFC(MNKCell FC[], int lenght) {
 		System.out.println("printo FC");
-		for(int i=0; i<5; i++) {
+		if(lenght>5)
+			lenght = 5;
+		for(int i=0; i<lenght; i++) {
 			System.out.print(" " + FC[i] + " ");
 		}
 		System.out.println("___________________________");
@@ -179,7 +185,7 @@ public class killer_heuristic {
 	}
 	
 	//------
-	
+	*/
 
 }
 

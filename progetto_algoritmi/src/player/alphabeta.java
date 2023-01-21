@@ -43,34 +43,29 @@ public class alphabeta{
 	
 	public MNKCell iterativeDeepening(MNKBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
 		//this.TT = TT;
+		
 		this.key = key;
 		int depth = starting_depth;
 		startingTime = startTime;
 		
 		MNKCell previousBestCell = FC[0];
 		memory history;
-		//System.out.println("Sto cercando qualcosa con key: " + key);
+		
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
 			System.out.println("ho preso lo score!" + history.i + " " + history.j);
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
-			
-			killer.printKiller(history.distance_from_root);
 			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell nelle mosse killer, metto -4 perch� � molto forte rispetto a una semplice mossa che fa pruning
-			
-			killer.printKiller(history.distance_from_root);
-			
 			if (history.incompleteLevel)
 				depth = history.depth - 1;
 			else
 				depth = history.depth;
 		}
+		
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
-		killer.printFC(FC, size);
 		killer.move_ordering(FC, size, distance_from_root);
-		killer.printFC(FC, size);
 		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
