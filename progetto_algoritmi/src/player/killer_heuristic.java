@@ -23,8 +23,8 @@ public class killer_heuristic {
 	protected killer_cell[][] killerMoves;
 	protected final int slot = 3;
 	protected final int max_distance_from_root;
-	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
-	protected final int max_negative_weight = -50;   //le mosse killer non possono scendere più in basso di questo valore, serve a risolvere il bug che c'erano mosse killer che avevano pesi tipo -1000
+	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che Ã¨ scarsa perchÃ¨ la mossa killer non Ã¨ servita per cut off
+	protected final int max_negative_weight = -50;   //le mosse killer non possono scendere piÃ¹ in basso di questo valore, serve a risolvere il bug che c'erano mosse killer che avevano pesi tipo -1000
 	protected int[] size;
 
 	public killer_heuristic(int M, int N) {
@@ -54,8 +54,9 @@ public class killer_heuristic {
 					
 			}
 		}
-		else {
-			size[distance_from_root]++;
+		else  { 
+                        if(size[distance_from_root]<slot)
+			   size[distance_from_root]++;
 			killerMoves[distance_from_root][size[distance_from_root]-1]=k_move;
 		}
 		adjust_weight(distance_from_root);
@@ -80,7 +81,7 @@ public class killer_heuristic {
 		}
 		return false;
 	}
-	public void change_weight(MNKCell move, int increment, int distance_from_root) { //l'incremento può essere pure negativo basta mettere il meno, più è basso il peso e più la killer move è forte
+	public void change_weight(MNKCell move, int increment, int distance_from_root) { //l'incremento puÃ² essere pure negativo basta mettere il meno, piÃ¹ Ã¨ basso il peso e piÃ¹ la killer move Ã¨ forte
 		for(int i=0; i<size[distance_from_root]; i++) {
 			if(myEqual(move,killerMoves[distance_from_root][i].killer_move)) {
 				if(increment>0)
@@ -103,7 +104,7 @@ public class killer_heuristic {
 		}
 		
 		for(int i = size[distance_from_root] - 1; i>=0; i--) {
-			if(killerMoves[distance_from_root][i].weight>weight_bound) {     //se la killer moves è scarsa la elimino
+			if(killerMoves[distance_from_root][i].weight>weight_bound) {     //se la killer moves Ã¨ scarsa la elimino
 				size[distance_from_root]--;
 			}
 		}
@@ -237,7 +238,7 @@ public class killer_heuristic {
 		}
 		return false;
 	}
-	public void change_weight(MNKCell move,int increment, int distance_from_root) { //l'incremento può essere pure negativo basta mettere il meno
+	public void change_weight(MNKCell move,int increment, int distance_from_root) { //l'incremento puÃ² essere pure negativo basta mettere il meno
 		killer_cell[] tmp = new killer_cell[slot];
 		for(int i=0; i<slot; i++) {
 			tmp[i] = killerMoves[distance_from_root].poll();
