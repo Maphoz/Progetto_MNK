@@ -53,15 +53,17 @@ public class alphabeta{
 		
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
-			System.out.println("ho preso lo score!" + history.i + " " + history.j);
+			//System.out.println("ho preso lo score!" + history.i + " " + history.j);
+
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
-			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell nelle mosse killer, metto -4 perch� � molto forte rispetto a una semplice mossa che fa pruning
+			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell in prima posizione nell'array Killer
 			if (history.incompleteLevel)
 				depth = history.depth - 1;
 			else
 				depth = history.depth;
 		}
+		//System.out.println("parto dalla depth " + depth);
 		
 		//pre-ordering moves through killer heuristic
 		int size = FC.length;
