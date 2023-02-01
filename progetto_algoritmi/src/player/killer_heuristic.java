@@ -13,7 +13,7 @@ public class killer_heuristic {
 	protected class killer_cell {
 		protected int weight;
 		protected MNKCell killer_move;
-		protected killer_cell(){	
+		protected killer_cell(){
 		}
 		protected void insert(MNKCell move, int weight) {
 			this.weight = weight;
@@ -22,12 +22,14 @@ public class killer_heuristic {
 	}
 	protected killer_cell[][] killerMoves;
 	protected final int slot = 3;
+	public final MNKCell KM_default;
 	protected final int max_distance_from_root;
 	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
 	protected final int max_negative_weight = -50;   //le mosse killer non possono scendere più in basso di questo valore, serve a risolvere il bug che c'erano mosse killer che avevano pesi tipo -1000
 	protected int[] size;
 
 	public killer_heuristic(int M, int N) {
+		KM_default = new MNKCell (-5,5);
 		max_distance_from_root = M*N;
 		size = new int [max_distance_from_root];
 		killerMoves = new killer_cell[max_distance_from_root][slot];
@@ -152,22 +154,23 @@ public class killer_heuristic {
 		}
 		
 	}
-	/*
-	public boolean deep_enough(int distance_from_root) {
-		if(distance_from_root>=decrement_distance_from_root) {
-			return true;
+	
+	public void removeKM(int distance, MNKCell enemy_move, MNKCell my_move, int M, int N) {
+		for(int d=distance; d<M*N; d++) {
+			for(int i = 0; i<size[d]; i++) {
+				if(myEqual(killerMoves[d][i].killer_move,enemy_move) || myEqual(killerMoves[d][i].killer_move,my_move))
+					killerMoves[d][i].weight = weight_bound + 100;
+			}
+			adjust_weight(d);		
 		}
-		else {
-			return false;
-		}
-	}*/
+	}
 	
 	private boolean myEqual(MNKCell a, MNKCell b) {
 		if(a.i==b.i && a.j==b.j)
 			return true;
 		else return false;
 	}
-	
+	/*
 	//-------
 	public void printFC(MNKCell FC[], int lenght) {
 		System.out.println("printo FC");
@@ -178,21 +181,21 @@ public class killer_heuristic {
 		}
 		System.out.println("___________________________");
 	}
-	public void printKiller(int distance, int M, int N) {
+	public void printKiller(int distance) {
 		System.out.println("printo mosse killer");
-		for(int j = distance; j<M*N; j++) {
+		//for(int j = distance; j<M*N; j++) {
 			for(int i=0; i<size[distance]; i++) {
-				System.out.print(" " + killerMoves[j][i].killer_move + " a distanza " + j );
+				System.out.print(" " + killerMoves[distance][i].killer_move + " a distanza " + distance + " con peso " + killerMoves[distance][i].weight);
 			}
 			System.out.println(" ");
-		}
+		//}
 		System.out.println("__________________");
 		
 		
 	}
 	
 	//------
-	
+	*/
 
 }
 

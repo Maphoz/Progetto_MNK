@@ -10,7 +10,7 @@ import mnkgame.MNKCellState;
 
 
 public class MNKPlayer implements mnkgame.MNKPlayer {
-	MNKBoard myBoard;
+	GameBoard myBoard;
 	MNKGameState winCondition;
 	MNKGameState losCondition;
 	alphabeta solver;
@@ -39,7 +39,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		rand = new Random(System.currentTimeMillis()); 
 		FirstTurn=true;
-		myBoard = new MNKBoard (M, N, K);
+		myBoard = new GameBoard (M, N, K);
 		
 		//saving the timeout in milliseconds
 		this.timeout = timeout_in_secs*1000;
@@ -65,50 +65,80 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		
 		threatBoard = new int[M][N];
 		calculateCellThreats(K);
+
+		/* 
+		myBoard.markCell(3,2);
+		eval.addSymbol(3, 2, false);
+		myBoard.markCell(2,1);
+		eval.addSymbol(2,1,true);
+		myBoard.markCell(2,2);
+		eval.addSymbol(2, 2, false);
+		myBoard.markCell(1,2);
+		eval.addSymbol(1,2, true);
+		myBoard.markCell(4,1);
+		eval.addSymbol(4, 1, false);
+		myBoard.markCell(2,3);
+		eval.addSymbol(2,3,true);
+		myBoard.markCell(4,2);
+		eval.addSymbol(4, 2, false);
+		myBoard.markCell(5,2);
+		eval.addSymbol(5,2,true);
+		myBoard.markCell(3,3);
+		eval.addSymbol(3, 3, false);
+		System.out.println(eval.evaluation(myBoard, true));
+		*/
 		
 	}
 
 	public MNKCell selectCell(MNKCell[] FC, MNKCell[] MC) {
-		
-		distance_from_root = MC.length + 1;
 		
 		//starting the time count
 		long startTime = System.currentTimeMillis();
 		//System.out.println("tempo di inizio: " + startTime);
 		
 		//adding to my board representation the last move played by the opponent
+		
 		if (MC.length != 0) {
-			
+			distance_from_root++;
 			myBoard.markCell(MC[MC.length - 1].i, MC[MC.length - 1].j);
 			eval.addSymbol(MC[MC.length - 1].i, MC[MC.length - 1].j, false);
 			key = TT.generate_key(key, MC[MC.length - 1].i, MC[MC.length - 1].j, enemyState);
+			if(FirstTurn) {
+				killer.removeKM(distance_from_root, MC[MC.length-1], killer.KM_default, M, N);
+			}
+			else {
+				killer.removeKM(distance_from_root,MC[MC.length-1], MC[MC.length-2], M, N);
+			}
 			//System.out.println("chiave con mossa fatta dall'avversario " + key + " con numero random " + TT.getStorage(MC[MC.length - 1].i, MC[MC.length - 1].j, enemyState));
 		}
 		
 		
 		if(FirstTurn) {
+			distance_from_root++;
 			MNKCell selected_move = center(FC, FC.length, M, N);
 			myBoard.markCell(selected_move.i,selected_move.j);
 			eval.addSymbol(selected_move.i,selected_move.j, true);
 			key = TT.generate_key(key, selected_move.i, selected_move.j, ourState);
-			solver.firstIterative(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
+			solver.firstIterative(myBoard, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 			FirstTurn = false;
 			return selected_move;
 		}
 		
+		MNKCell[] IC = myBoard.getInterestingCells();
 		//checking if there are any winning or losing moves
-		MNKCell enemy_winning = FC[0];
+		MNKCell enemy_winning = IC[0];
 		boolean enemyWin = false;
-		if (FC.length == 1)
-			return FC[0];
+		
+		if (IC.length == 1)
+			return IC[0];
 		else {
-			for (int z = 0; z < FC.length; z++) {
-				if (myBoard.markCell(FC[z].i, FC[z].j) == winCondition)
-					return FC[z];
+			for (int z = 0; z < IC.length; z++) {
+				if (myBoard.markCell(IC[z].i, IC[z].j) == winCondition)
+					return IC[z];
 				else{
-					if (myBoard.markCell(FC[(z+1)%FC.length].i, FC[(z+1)%FC.length].j) == losCondition) {
+					if (myBoard.markCell(IC[(z+1)%IC.length].i, IC[(z+1)%IC.length].j) == losCondition) {
 						enemyWin = true;
-						enemy_winning = FC[(z+1)%FC.length];
+						enemy_winning = IC[(z+1)%IC.length];
 						myBoard.unmarkCell();
 						myBoard.unmarkCell();
 					}
@@ -120,19 +150,23 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 			}
 		}
 		if (enemyWin) {
+			distance_from_root++;
 			myBoard.markCell(enemy_winning.i, enemy_winning.j);
 			eval.addSymbol(enemy_winning.i, enemy_winning.j, true);
 			key = TT.generate_key(key, enemy_winning.i, enemy_winning.j, ourState);
+			solver.firstIterative(myBoard, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 			return enemy_winning;
 		}
-
-		MNKCell bestCell = solver.iterativeDeepening(myBoard, FC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
+		MNKCell bestCell = solver.iterativeDeepening(myBoard, IC, myBoard.M * myBoard.N - MC.length, TT, killer, distance_from_root, eval, startTime, key);
 
 		//System.out.println("chiave prima di aver giocato la mossa: " + key);
 		myBoard.markCell(bestCell.i, bestCell.j);
 		eval.addSymbol(bestCell.i, bestCell.j, true);
 		key = TT.generate_key(key, bestCell.i, bestCell.j, ourState);
-		killer.printKiller(distance_from_root,M,N);
+		
+
+		distance_from_root++;
+
 		//System.out.println("chiave dopo aver giocato la mossa: " + key +" con numero random " + TT.getStorage(bestCell.i, bestCell.j, ourState));
 		return bestCell;
 	}
