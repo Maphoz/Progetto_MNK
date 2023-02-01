@@ -132,6 +132,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		myBoard.markCell(bestCell.i, bestCell.j);
 		eval.addSymbol(bestCell.i, bestCell.j, true);
 		key = TT.generate_key(key, bestCell.i, bestCell.j, ourState);
+		killer.printKiller(distance_from_root,M,N);
 		//System.out.println("chiave dopo aver giocato la mossa: " + key +" con numero random " + TT.getStorage(bestCell.i, bestCell.j, ourState));
 		return bestCell;
 	}

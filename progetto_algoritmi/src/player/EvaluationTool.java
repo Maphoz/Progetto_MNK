@@ -1,5 +1,6 @@
 package player;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import mnkgame.MNKBoard;
 import mnkgame.MNKCellState;
@@ -20,8 +21,17 @@ public class EvaluationTool {
 	
 	//maps that store how many symbols there are in each row/column to evaluate a board
 	//saves time if n symbols < k-2
-	HashMap<Integer, int[]> row_symbols = new HashMap<>();
-	HashMap<Integer, int[]> col_symbols = new HashMap<>();
+	public int rowSymbols[][];
+	public int colSymbols[][];
+	public int diagRowSymb[][];
+	public int antiDiagRowSymb[][];
+	int diagColSymb[][];
+	int antiDiagColSymb[][];
+
+	public static int diagBoard[][];
+
+	HashSet<Integer> rowEval = new HashSet<Integer>();
+	HashSet<Integer> colEval = new HashSet<Integer>();
 	
 	//memorizes if i'm P1 or P2
 	MNKCellState mySymb;
@@ -31,12 +41,20 @@ public class EvaluationTool {
 	int diagRow[];
 	int diagCol[];
 	int k; 				//number of aligned symbols required to win; 
+	int m;
+	int n;
 	
 	public EvaluationTool(int m, int n, int k, boolean first) {
 		this.k = k;
-		
+		this.m = m;
+		this.n = n;
+
+		//threats structure initialization
+		myThreats = new int[MAX_THREATS];
+		enemyThreats = new int[MAX_THREATS];
 		enemyThreatsEval = new int[MAX_THREATS];
 		myThreatsEval = new int[MAX_THREATS];
+
 		enemyThreatsEval[k1OpenIndex] = 5020;
 		enemyThreatsEval[k2OpenIndex] = 1300;
 		enemyThreatsEval[k1SopenIndex] = 2000;
@@ -55,18 +73,31 @@ public class EvaluationTool {
 			myThreatsEval[k1SopenIndex] = 80;
 		}
 		
+
+		//Symbols memorization initialization
+		diagBoard = new int[m][n];
 		diagRow = new int[n];
-		for (int i = 0; i < n; i++)
+		diagRowSymb = new int[n][2];
+		antiDiagRowSymb = new int[n][2];
+		/*
+		for (int i = 0; i < n; i++){
 			diagRow[i] = 0;
+		}
+		*/
+
 		diagCol = new int[m];
+		diagColSymb = new int[m][2];
+		antiDiagColSymb = new int[m][2];
+		/*
 		for (int i = 0; i < m; i++)
 			diagCol[i] = 0;
+		*/
+		rowSymbols = new int[m][2];
+		colSymbols = new int[n][2];
+
 		
 		//calculates which diagonals are interesting for us
 		diagonalCalculations(m, n, k);
-		
-		myThreats = new int[MAX_THREATS];
-		enemyThreats = new int[MAX_THREATS];
 	}
 	
 	
@@ -81,64 +112,69 @@ public class EvaluationTool {
 			myThreats[i] = 0;
 			enemyThreats[i] = 0;
 		}
+
 		//iterate through all the rows
-		for (int i = 0; i < board.M; i++) {
-			//if they have sufficient amount of symbols in them, for either player
-			//try to find sequences
-			if (row_symbols.containsKey(i) && row_symbols.get(i)[0] + row_symbols.get(i)[1] < board.N) {
-				if (row_symbols.get(i)[0] >= k-1) {
-					countRowSequence(board, mySymb, true, i, myThreats);
+		Iterator<Integer> iteratorRow = rowEval.iterator();
+		while (iteratorRow.hasNext()) {
+   			int row = iteratorRow.next();
+			if ((rowSymbols[row][0] + rowSymbols[row][1]) < n){
+				//checking for my threats
+				if (rowSymbols[row][0] >= k - 1){
+					//System.out.println("Controllo la riga " + row + "per me (k - 1)");
+					countRowSequence(board, mySymb, true, row, myThreats);
 					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
 					}
 				}
-				else if (row_symbols.get(i)[0] == k-2) {
-					countRowSequence(board, mySymb, false, i, myThreats);
-					if (myTurn && checkWin(myTurn)) {
-						return MAX_EVALUATION;
-					}
+				else if (rowSymbols[row][0] == k - 2){
+					//System.out.println("Controllo la riga " + row + "per me (k - 2)");
+					countRowSequence(board, mySymb, false, row, myThreats);
 				}
-				if (row_symbols.get(i)[1] >= k-1) {
-					countRowSequence(board, enemySymb, true, i, enemyThreats);
+				//checking for enemy threats
+				if (rowSymbols[row][1] >= k - 1){
+					//System.out.println("Controllo la riga " + row + "per lui (k - 1)");
+					countRowSequence(board, enemySymb, true, row, enemyThreats);
 					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
 					}
 				}
-				else if (row_symbols.get(i)[1] == k-2) {
-					countRowSequence(board, enemySymb, false, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn)) {
-						return MIN_EVALUATION;
-					}
+				else if (rowSymbols[row][1] == k - 2){
+					//System.out.println("Controllo la riga " + row + "per lui (k - 2)");
+					countRowSequence(board, enemySymb, false, row, enemyThreats);
 				}
 			}
 		}
-		for (int i = 0; i < board.N; i++) {
-			//if they have sufficient amount of symbols in them, for either player
-			//try to find sequences
-			if (col_symbols.containsKey(i) && col_symbols.get(i)[0] + col_symbols.get(i)[1] < board.M) {
-				if (col_symbols.get(i)[0] >= k-1) {
-					countColSequence(board, mySymb, true, i, myThreats);
+
+		//iterate through all the columns
+		Iterator<Integer> iteratorCol = colEval.iterator();
+		while (iteratorCol.hasNext()) {
+   			int col = iteratorCol.next();
+			if ((colSymbols[col][0] + colSymbols[col][1]) < m){
+
+				//checking for my threats
+				if (colSymbols[col][0] >= k - 1){
+					//System.out.println("Controllo la colonna " + col + "per me (k - 1)");
+					countColSequence(board, mySymb, true, col, myThreats);
 					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
 					}
 				}
-				else if (col_symbols.get(i)[0] == k-2) {
-					countColSequence(board, mySymb, false, i, myThreats);
-					if (myTurn && checkWin(myTurn)) {
-						return MAX_EVALUATION;
-					}
+				else if (colSymbols[col][0] == k - 2){
+					//System.out.println("Controllo la colonna " + col + "per me (k - 2)");
+					countColSequence(board, mySymb, false, col, myThreats);
 				}
-				if (col_symbols.get(i)[1] >= k-1) {
-					countColSequence(board, enemySymb, true, i, enemyThreats);
+
+				//checking for enemy threats
+				if (colSymbols[col][1] >= k - 1){
+					//System.out.println("Controllo la colonna " + col + "per lui (k - 1)");
+					countColSequence(board, enemySymb, true, col, enemyThreats);
 					if (!myTurn && checkWin(myTurn)) {
 						return MIN_EVALUATION;
 					}
 				}
-				else if (col_symbols.get(i)[1] == k-2) {
-					countColSequence(board, enemySymb, false, i, enemyThreats);
-					if (!myTurn && checkWin(myTurn)) {
-						return MIN_EVALUATION;
-					}
+				else if (colSymbols[col][1] == k - 2){
+					//System.out.println("Controllo la colonna " + col + "per lui (k - 2)");
+					countColSequence(board, enemySymb, false, col, enemyThreats);
 				}
 			}
 		}
@@ -147,28 +183,34 @@ public class EvaluationTool {
 		for (int i = 0; i < board.N; i++) {
 			switch (diagRow[i]) {
 				case 1: {
-					countDiagSequence(0, i, board);
-					if (myTurn && checkWin(myTurn)) {
-						return MAX_EVALUATION;
-					}
-					if (!myTurn && checkWin(myTurn)) {
-						return MIN_EVALUATION;
+					if (diagRowSymb[i][0] + diagRowSymb[i][1] < Math.min(m, n - i) && ( diagRowSymb[i][0] >= k - 2 || diagRowSymb[i][1] >= k - 2)){
+						countDiagSequence(0, i, board);
+						if (myTurn && checkWin(myTurn)) {
+							return MAX_EVALUATION;
+						}
+						if (!myTurn && checkWin(myTurn)) {
+							return MIN_EVALUATION;
+						}
 					}
 					break;
 				}
 				case 2: {
-					countAntidiagSequence(0, i, board);
-					if (myTurn && checkWin(myTurn)) {
-						return MAX_EVALUATION;
-					}
-					if (!myTurn && checkWin(myTurn)) {
-						return MIN_EVALUATION;
+					if (antiDiagRowSymb[i][0] + antiDiagRowSymb[i][1] < Math.min(m, i + 1) && ( antiDiagRowSymb[i][0] >= k - 2 || antiDiagRowSymb[i][1] >= k - 2)){
+						countAntidiagSequence(0, i, board);
+						if (myTurn && checkWin(myTurn)) {
+							return MAX_EVALUATION;
+						}
+						if (!myTurn && checkWin(myTurn)) {
+							return MIN_EVALUATION;
+						}
 					}
 					break;
 				}
 				case 3:{
-					countDiagSequence(0, i, board);
-					countAntidiagSequence(0, i, board);
+					if (diagRowSymb[i][0] + diagRowSymb[i][1] < Math.min(m, n - i) && ( diagRowSymb[i][0] >= k - 2 || diagRowSymb[i][1] >= k - 2))
+						countDiagSequence(0, i, board);
+					if (antiDiagRowSymb[i][0] + antiDiagRowSymb[i][1] < Math.min(m, i + 1) && ( antiDiagRowSymb[i][0] >= k - 2 || antiDiagRowSymb[i][1] >= k - 2))
+						countAntidiagSequence(0, i, board);
 					if (myTurn && checkWin(myTurn)) {
 						return MAX_EVALUATION;
 					}
@@ -184,19 +226,23 @@ public class EvaluationTool {
 		
 		int i = 1;
 		while (diagCol[i] > 0) {
-			countDiagSequence(i, 0, board);
-			if (myTurn && checkWin(myTurn)) {
-				return MAX_EVALUATION;
+			if (diagColSymb[i][0] + diagColSymb[i][1] < m - i && (diagColSymb[i][0] >= k - 2 || diagColSymb[i][1] >= k - 2)){
+				countDiagSequence(i, 0, board);
+				if (myTurn && checkWin(myTurn)) {
+					return MAX_EVALUATION;
+				}
+				if (!myTurn && checkWin(myTurn)) {
+					return MIN_EVALUATION;
+				}
 			}
-			if (!myTurn && checkWin(myTurn)) {
-				return MIN_EVALUATION;
-			}
-			countAntidiagSequence(i, board.N - 1, board);
-			if (myTurn && checkWin(myTurn)) {
-				return MAX_EVALUATION;
-			}
-			if (!myTurn && checkWin(myTurn)) {
-				return MIN_EVALUATION;
+			if (diagColSymb[i][0] + diagColSymb[i][1] < m - i && (diagColSymb[i][0] >= k - 2 || diagColSymb[i][1] >= k - 2)){
+				countAntidiagSequence(i, n - 1, board);
+				if (myTurn && checkWin(myTurn)) {
+					return MAX_EVALUATION;
+				}
+				if (!myTurn && checkWin(myTurn)) {
+					return MIN_EVALUATION;
+				}
 			}
 			i++;
 		}
@@ -399,6 +445,7 @@ public class EvaluationTool {
 	}
 	
 	protected void countDiagSequence (int row, int col, MNKBoard board) {
+		//System.out.println("Sto controllando la diagonale che parte da " + row + " " + col);
 		int i = 0;
 		while (row + i < board.M && col + i < board.N) {
 			if (board.cellState(row + i, col + i) == MNKCellState.FREE) {
@@ -475,6 +522,7 @@ public class EvaluationTool {
 	}
 	
 	protected void countAntidiagSequence (int row, int col, MNKBoard board) {
+		//System.out.println("Sto controllando l' antidiagonale che parte da " + row + " " + col);
 		int i = 0;
 		while (row + i < board.M && col - i >= 0) {
 			if (board.cellState(row + i, col - i) == MNKCellState.FREE) {
@@ -567,7 +615,7 @@ public class EvaluationTool {
 			else break;
 		}
 		//column check
-		for (int i = 0; i < m; i++) {
+		for (int i = 1; i < m; i++) {
 			if (Math.min(m-i, n) >= k)
 				diagCol[i]++;
 			else break;
@@ -581,43 +629,65 @@ public class EvaluationTool {
 	
 	public void addSymbol(int row, int col, boolean my_move) {
 		if (my_move) {
-			//System.out.println("Io gioco " + row + " " + col);
-			if (!row_symbols.containsKey(row)) {
-				row_symbols.put(row, new int[] {0, 0});
-			}
-			row_symbols.get(row)[0]++;
-			
-			if (!col_symbols.containsKey(col)) {
-				col_symbols.put(col, new int[] {0, 0});
-			}
-			col_symbols.get(col)[0]++;
+			rowSymbols[row][0]++;
+			if (rowSymbols[row][0] == k-2 && rowSymbols[row][1] < k-2)
+				rowEval.add(row);
+			colSymbols[col][0]++;
+			if (colSymbols[col][0] == k-2 && colSymbols[col][1] < k-2)
+				colEval.add(col);
+
+			if (diagBoard[row][col] == 1 || diagBoard[row][col] == 3)
+				symbDiag(row, col, 0, 1);
+
+			if (diagBoard[row][col] >= 2)
+				symbAntiDiag(row, col, 0, 1);
 		}
 		
 		else {
-			//System.out.println("Lui gioco " + row + " " + col);
-			if (!row_symbols.containsKey(row)) {
-				row_symbols.put(row, new int[] {0, 0});
-			}
-			row_symbols.get(row)[1]++;
-			
-			if (!col_symbols.containsKey(col)) {
-				col_symbols.put(col, new int[] {0, 0});
-			}
-			col_symbols.get(col)[1]++;
+			rowSymbols[row][1]++;
+			if (rowSymbols[row][1] == k-2 && rowSymbols[row][0] < k-2)
+				rowEval.add(row);
+			colSymbols[col][1]++;
+			if (colSymbols[col][1] == k-2 && colSymbols[col][0] < k-2)
+				colEval.add(col);
+
+			if (diagBoard[row][col] == 1 || diagBoard[row][col] == 3)
+				symbDiag(row, col, 1, 1);
+
+			if (diagBoard[row][col] >= 2)
+				symbAntiDiag(row, col, 1, 1);
 		}
 	}
-	
-	
+
 	public void removeSymbol(int row, int col, boolean my_move) {
 		if (my_move) {
-			//System.out.println("Io tolgo " + row + " " + col);
-			row_symbols.get(row)[0]--;
-			col_symbols.get(col)[0]--;
+			rowSymbols[row][0]--;
+			if (rowSymbols[row][0] == k-3 && rowSymbols[row][1] < k-2)
+				rowEval.remove(row);
+			colSymbols[col][0]--;
+			if (colSymbols[col][0] == k-3 && colSymbols[col][1] < k-2)
+				colEval.remove(col);
+
+			if (diagBoard[row][col] == 1 || diagBoard[row][col] == 3)
+				symbDiag(row, col, 0, -1);
+
+			if (diagBoard[row][col] >= 2)
+				symbAntiDiag(row, col, 0, -1);
+
 		}
 		else {
-			//System.out.println("lui tolgo " + row + " " + col);
-			row_symbols.get(row)[1]--;
-			col_symbols.get(col)[1]--;
+			rowSymbols[row][1]--;
+			if (rowSymbols[row][1] == k-3 && rowSymbols[row][0] < k-2)
+				rowEval.remove(row);
+			colSymbols[col][1]--;
+			if (colSymbols[col][1] == k-3 && colSymbols[col][0] < k-2)
+				colEval.remove(col);
+
+			if (diagBoard[row][col] == 1 || diagBoard[row][col] == 3)
+				symbDiag(row, col, 1, -1);
+
+			if (diagBoard[row][col] >= 2)
+				symbAntiDiag(row, col, 1, -1);
 		}
 	}
 	
@@ -640,8 +710,21 @@ public class EvaluationTool {
 		//commento a caso per far eun push
 	}
 	
-	
-	
+	public void symbDiag(int row, int col, int player, int delta){
+		if (row > col)
+			diagColSymb[row - col][player] += delta;
+		else
+			diagRowSymb[col - row][player] += delta;
+	}
+
+	public void symbAntiDiag(int row, int col, int player, int delta){
+		int deltaCol = diagRow.length - col - 1;
+		if (row <= deltaCol)
+			antiDiagRowSymb[row + col][player] += delta;
+		else
+			antiDiagColSymb[row - deltaCol][player] += delta;
+	}
+
 	//computes the number of threats * evaluation
 	protected int threatCalculation(boolean myTurn) {
 		if (myTurn && (enemyThreats[k1OpenIndex] > 0 || enemyThreats[k1SopenIndex] > 1) && (myThreats[k1OpenIndex] + myThreats[k1SopenIndex] == 0))
