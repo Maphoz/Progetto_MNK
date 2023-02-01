@@ -58,19 +58,17 @@ public class EvaluationTool {
 		enemyThreatsEval[k1OpenIndex] = 5020;
 		enemyThreatsEval[k2OpenIndex] = 1300;
 		enemyThreatsEval[k1SopenIndex] = 2000;
+
+		myThreatsEval[k1OpenIndex] = 250;
+		myThreatsEval[k2OpenIndex] = 100;
+		myThreatsEval[k1SopenIndex] = 80;
 		if (first) {
 			mySymb = MNKCellState.P1;
 			enemySymb = MNKCellState.P2;
-			for (int i = 0; i < MAX_THREATS; i++){
-				myThreatsEval[i] = enemyThreatsEval[i];
-			}
 		}
 		else {
 			mySymb = MNKCellState.P2;
 			enemySymb = MNKCellState.P1;
-			myThreatsEval[k1OpenIndex] = 250;
-			myThreatsEval[k2OpenIndex] = 100;
-			myThreatsEval[k1SopenIndex] = 80;
 		}
 		
 
@@ -106,7 +104,7 @@ public class EvaluationTool {
 	//provide board
 	//true if it is our turn, false if enemy's
 	
-	public int evaluation(MNKBoard board, boolean myTurn) {
+	public int evaluation(GameBoard board, boolean myTurn) {
 		//reset the threats array
 		for (int i = 0; i < MAX_THREATS; i++) {
 			myThreats[i] = 0;
@@ -262,7 +260,7 @@ public class EvaluationTool {
 	//allSeq: true if symbols > k-1, false otherwise
 	//row: number of the row we are inspecting
 	//threats: myThreats or enemyThreats based on whose threats we are counting
-	protected void countRowSequence(MNKBoard board, MNKCellState symb, boolean allSeq, int row, int[] threats) {
+	protected void countRowSequence(GameBoard board, MNKCellState symb, boolean allSeq, int row, int[] threats) {
 		if (allSeq) {
 			int z = 0;
 			while (z < board.N - k + 1) {
@@ -355,7 +353,7 @@ public class EvaluationTool {
 	//allSeq: true if symbols > k-1, false otherwise
 	//col: number of the column we are inspecting
 	//threats: myThreats or enemyThreats based on whose threats we are counting
-	protected void countColSequence(MNKBoard board, MNKCellState symb, boolean allSeq, int col, int[] threats) {
+	protected void countColSequence(GameBoard board, MNKCellState symb, boolean allSeq, int col, int[] threats) {
 		if (allSeq) {
 			int z = 0;
 			while (z < board.M - k + 1) {
@@ -444,7 +442,7 @@ public class EvaluationTool {
 		}
 	}
 	
-	protected void countDiagSequence (int row, int col, MNKBoard board) {
+	protected void countDiagSequence (int row, int col, GameBoard board) {
 		//System.out.println("Sto controllando la diagonale che parte da " + row + " " + col);
 		int i = 0;
 		while (row + i < board.M && col + i < board.N) {
@@ -521,7 +519,7 @@ public class EvaluationTool {
 		}
 	}
 	
-	protected void countAntidiagSequence (int row, int col, MNKBoard board) {
+	protected void countAntidiagSequence (int row, int col, GameBoard board) {
 		//System.out.println("Sto controllando l' antidiagonale che parte da " + row + " " + col);
 		int i = 0;
 		while (row + i < board.M && col - i >= 0) {
