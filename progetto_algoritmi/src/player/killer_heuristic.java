@@ -21,7 +21,7 @@ public class killer_heuristic {
 		}
 	}
 	protected killer_cell[][] killerMoves;
-	protected final int slot = 3;
+	protected final int slot;
 	public final MNKCell KM_default;
 	protected final int max_distance_from_root;
 	protected final int weight_bound = 4;                 //da testare, se la mossa ha un bound <3 significa che è scarsa perchè la mossa killer non è servita per cut off
@@ -29,6 +29,8 @@ public class killer_heuristic {
 	protected int[] size;
 
 	public killer_heuristic(int M, int N) {
+		slot = fix_slot_number(M,N);
+		System.out.println("lo slot � " + slot);
 		KM_default = new MNKCell (-5,5);
 		max_distance_from_root = M*N;
 		size = new int [max_distance_from_root];
@@ -39,6 +41,16 @@ public class killer_heuristic {
 				killerMoves[i][j] =  new killer_cell();
 			}
 		}
+	}
+	protected int fix_slot_number(int M, int N) {
+		if(M*N<=25)        //5 5
+			return 2;
+		else if(M*N<=81)     //9 9
+			return 3;
+		else if (M*N<=400)   //20 20
+			return 4;
+		else 
+			return 5;
 	}
 
 	public void insert_KM(MNKCell move, int weight, int distance_from_root, boolean ispreviousBestMove) {
