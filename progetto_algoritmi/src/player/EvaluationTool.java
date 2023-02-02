@@ -108,7 +108,7 @@ public class EvaluationTool {
 		Iterator<Integer> iteratorRow = rowEval.iterator();
 		while (iteratorRow.hasNext()) {
 			int row = iteratorRow.next();
-			System.out.println("La row: " + row + " e nella mappa");
+			//System.out.println("La row: " + row + " e nella mappa");
 			if ((rowSymbols[row][0] + rowSymbols[row][1]) < n){
 				countRowSequence(board, row);
 				if (myTurn && checkWin(myTurn))
@@ -122,7 +122,7 @@ public class EvaluationTool {
 		Iterator<Integer> iteratorCol = colEval.iterator();
 		while (iteratorCol.hasNext()) {
    			int col = iteratorCol.next();
-			System.out.println("La col: " + col + " e nella mappa");
+			//System.out.println("La col: " + col + " e nella mappa");
 			if ((colSymbols[col][0] + colSymbols[col][1]) < m){
 				countColSequence(board, col);
 				if (myTurn && checkWin(myTurn))
@@ -216,7 +216,7 @@ public class EvaluationTool {
 	//row: number of the row we are inspecting
 	//threats: myThreats or enemyThreats based on whose threats we are counting
 	protected void countRowSequence(GameBoard board, int row) {
-		//System.out.println("Entro a controllare la row: " + row);
+		//System.out.println("Errore avviene in row");
 		int prevFree = 0;
 		int z = 0;
 		while(z < board.N - minSeq){
@@ -320,7 +320,7 @@ public class EvaluationTool {
 						if (zeros_count == 2){
 							z = j - 1;
 							//rimuovi symCount - 1
-							if (board.isFree(row, j - 2)){
+							if (j - 2 >= 0 && board.isFree(row, j - 2)){
 								prevFree = 1;
 							}
 							else
@@ -334,7 +334,7 @@ public class EvaluationTool {
 					if (symbCount == k - 2 && zeros_count == 1 && z - 1 >= 0 && board.isEqual(row, z-1, symb))
 						updateSopen(symb, symbCount);
 					z = j;
-					if (board.isFree(row, j - 2)){
+					if (j - 2 >= 0 && board.isFree(row, j - 2)){
 						prevFree = 1;
 					}
 					else
@@ -346,7 +346,8 @@ public class EvaluationTool {
 	}
 
 	protected void countColSequence(GameBoard board, int col) {
-		//System.out.println("Entro a controllare la col: " + col);
+		//System.out.println("Errore avviene in col");
+
 		int prevFree = 0;
 		int z = 0;
 		while(z < board.M - minSeq){
@@ -444,7 +445,7 @@ public class EvaluationTool {
 						if (zeros_count == 2){
 							z = j - 1;
 							//rimuovi symCount - 1
-							if (board.isFree(j - 2, col)){
+							if (j - 2 >= 0 && board.isFree(j - 2, col)){
 								prevFree = 1;
 							}
 							else
@@ -458,7 +459,7 @@ public class EvaluationTool {
 					if (symbCount == k - 2 && zeros_count == 1 && z - 1 >= 0 && board.isEqual(z - 1, col, symb))
 						updateSopen(symb, symbCount);
 					z = j;
-					if (board.isFree(j - 2, col)){
+					if (j - 2 >= 0 && board.isFree(j - 2, col)){
 						prevFree = 1;
 					}
 					else
@@ -469,14 +470,14 @@ public class EvaluationTool {
 	}
 
 	protected void countDiagSequence(GameBoard board, int row, int col) {
-		//System.out.println("Entro a controllare la diag: " + row + " " + col);
+		//System.out.println("Errore avviene in diag");
 		int prevFree = 0;
 		int z = 0;
 		while(row + z < board.M - minSeq && col + z < board.N - minSeq){
 			//System.out.println("row " + row + " z " + z);
 			if (board.isFree(row + z, col + z)){
 				prevFree++;
-				if (row + z + 1 <= board.M && col + z + 1 <= board.N && board.isFree(row + z + 1, col + z + 1)){
+				if (row + z + 1 < board.M && col + z + 1 < board.N && board.isFree(row + z + 1, col + z + 1)){
 					z++;
 				}
 				else{
@@ -568,7 +569,7 @@ public class EvaluationTool {
 						if (zeros_count == 2){
 							z = j - 1;
 							//rimuovi symCount - 1
-							if (board.isFree(row + j - 2, col + j - 2)){
+							if (row + j - 2 >= 0 && col + j - 2 >= 0 && board.isFree(row + j - 2, col + j - 2)){
 								prevFree = 1;
 							}
 							else
@@ -582,7 +583,7 @@ public class EvaluationTool {
 					if (symbCount == k - 2 && zeros_count == 1 && row + z - 1 >= 0 && col + z - 1 >= 0 && board.isEqual(row + z - 1, col + z - 1, symb))
 						updateSopen(symb, symbCount);
 					z = j;
-					if (board.isFree(row + j - 2, col + j - 2)){
+					if (row + j - 2 >= 0 && col + j - 2 >= 0 && board.isFree(row + j - 2, col + j - 2)){
 						prevFree = 1;
 					}
 					else
@@ -593,14 +594,14 @@ public class EvaluationTool {
 	}
 
 	protected void countAntiDiagSequence(GameBoard board, int row, int col) {
-		//System.out.println("Entro a controllare la antiDiag: " + row + " " + col);
+		//System.out.println("Errore avviene in antidiag");
 		int prevFree = 0;
 		int z = 0;
-		while(row + z < board.M - minSeq && col - z >= 0){
-			//System.out.println("row " + row + " z " + z);
+		while(row + z < board.M - 1 && col - z > 0){
 			if (board.isFree(row + z, col - z)){
+				//System.out.println("Errore avviene in free");
 				prevFree++;
-				if (row + z + 1 <= board.M && col - z - 1 <= board.N && board.isFree(row + z + 1, col - z - 1)){
+				if (row + z + 1 < board.M && col - z - 1 >= 0 && board.isFree(row + z + 1, col - z - 1)){
 					z++;
 				}
 				else{
@@ -611,7 +612,7 @@ public class EvaluationTool {
 						newInd++;
 						symCount++;
 					}
-					if (row + newInd == board.M || col - newInd == board.N){
+					if (row + newInd == board.M || col - newInd == -1){
 						if (symCount == k - 1){
 							updateSopen(currP, symCount);
 						}
@@ -622,8 +623,6 @@ public class EvaluationTool {
 							if (symCount >= minSeq){
 								int freeInd = newInd;
 								int sucFree = 0;
-								//System.out.println((freeInd < board.N) + " " + board.isFree(row, freeInd) + (prevFree + symCount + sucFree < K));
-								//System.out.println(prevFree + " " + symCount + " " + sucFree + " " + K);
 								while(row + freeInd < board.M && col - freeInd >= 0 && board.isFree(row + freeInd, col - freeInd) && (prevFree + symCount + sucFree < k)){
 									freeInd++;
 									sucFree++;
@@ -660,11 +659,13 @@ public class EvaluationTool {
 				}
 			}
 			else{
+				//System.out.println("Errore avviene in symb");
 				MNKCellState symb = board.cellState(row + z, col - z);
 				int j = z + 1;
 				int zeros_count = 0;
 				boolean diff_symb = false;
 				int symbCount = 1;
+				//System.out.println("Errore avviene nel primo while");
 				while (zeros_count < 2 && row + j < board.M && col - j >= 0 && symbCount < k - 1){
 					if (board.isFree(row + j, col - j)){
 						zeros_count++;
@@ -677,6 +678,7 @@ public class EvaluationTool {
 						symbCount++;
 					j++;
 				}
+				//System.out.println("Errore avviene dopo il primo while");
 				if (!diff_symb) {
 					if (symbCount == k - 1 && zeros_count <= 1){
 						updateSopen(symb, symbCount);
@@ -692,7 +694,7 @@ public class EvaluationTool {
 						if (zeros_count == 2){
 							z = j - 1;
 							//rimuovi symCount - 1
-							if (board.isFree(row + j - 2, col - j + 2)){
+							if (row + j - 2 >= 0 && col - j + 2 < board.N && board.isFree(row + j - 2, col - j + 2)){
 								prevFree = 1;
 							}
 							else
@@ -703,10 +705,10 @@ public class EvaluationTool {
 					}
 				}
 				else {
-					if (symbCount == k - 2 && zeros_count == 1 && row + z - 1 >= 0 && col + z - 1 < board.N && board.isEqual(row + z - 1, col - z + 1, symb))
+					if (symbCount == k - 2 && zeros_count == 1 && row + z - 1 >= 0 && col - z + 1 < board.N && board.isEqual(row + z - 1, col - z + 1, symb))
 						updateSopen(symb, symbCount);
 					z = j;
-					if (board.isFree(row + j - 2, col - j + 2)){
+					if (row + j - 2 >= 0 && col - j + 2 < board.N && board.isFree(row + j - 2, col - j + 2)){
 						prevFree = 1;
 					}
 					else
@@ -883,7 +885,7 @@ public class EvaluationTool {
 			openThreatEval[MAX_THREATS - 1][1] = (k/5 + 1) * 5020;
 		}
 		
-		openThreatEval[MAX_THREATS - 1][0] = (int)(openThreatEval[MAX_THREATS - 1][1] / reducingCoefficient);
+		openThreatEval[MAX_THREATS - 1][0] = (int)(openThreatEval[MAX_THREATS - 1][1] / 15);
 	
 		for (int i = (MAX_THREATS - 2); i >= 0; i--){
 			openThreatEval[i][1] = (int)(openThreatEval[i + 1][1] / reducingCoefficient);
@@ -896,7 +898,7 @@ public class EvaluationTool {
 		sopenThreatEval[1][0] = sopenThreatEval[1][1] / 15;
 		
 		/*
-		System.out.println("K = " + K);
+		System.out.println("K = " + k);
 		System.out.println("OPEN THREATS EVAL");
 		int c = 1;
 		for (int i = k - minSeq - 1; i >= 0; i--){
@@ -907,11 +909,11 @@ public class EvaluationTool {
 	
 		System.out.println("k - 1 eval mia: " + sopenThreatEval[0][0] + " sue: " + sopenThreatEval[0][1]);
 		System.out.println("k - 2 eval mia: " + sopenThreatEval[1][0] + " sue: " + sopenThreatEval[1][1]);
-	*/
+		*/
 	}
 	
 	public void symbDiag(int row, int col, int player, int delta){
-		System.out.println("Sono qui per aggiungere simboli alle diagonali");
+		//System.out.println("Sono qui per aggiungere simboli alle diagonali");
 		if (row > col)
 			diagColSymb[row - col][player] += delta;
 		else
@@ -919,7 +921,7 @@ public class EvaluationTool {
 	}
 
 	public void symbAntiDiag(int row, int col, int player, int delta){
-		System.out.println("Sono qui per aggiungere simboli alle antidiagonali");
+		//System.out.println("Sono qui per aggiungere simboli alle antidiagonali");
 		int deltaCol = diagRow.length - col - 1;
 		if (row <= deltaCol)
 			antiDiagRowSymb[row + col][player] += delta;
@@ -940,12 +942,13 @@ public class EvaluationTool {
 		int c = MAX_THREATS;
 		for (int i = 0; i < MAX_THREATS; i++){
 			eval = eval + openSeq[i][0]*openThreatEval[i][0] - openSeq[i][1]*openThreatEval[i][1];
-			System.out.println("Minacce k - " + c + " mie: " + openSeq[i][0] + " sue: " + openSeq[i][1]);
+			//System.out.println("Minacce k - " + c + " mie: " + openSeq[i][0] + " sue: " + openSeq[i][1]);
 			c--;
 		}
-		//valuto i threat semiopen
+		/*
 		System.out.println("K - 1 semiopen, mie: " + sopenSeq[0][0] + " sue: " + sopenSeq[0][1]);
 		System.out.println("K - 2 semiopen, mie: " + sopenSeq[1][0] + " sue: " + sopenSeq[1][1]);
+		*/
 		eval = eval + sopenSeq[0][0]*sopenThreatEval[0][0] - sopenSeq[0][1]*sopenThreatEval[0][1];
 		eval = eval + sopenSeq[1][0]*sopenThreatEval[1][0] - sopenSeq[1][1]*sopenThreatEval[1][1];
 		return eval;
