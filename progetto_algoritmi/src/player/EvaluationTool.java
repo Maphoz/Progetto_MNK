@@ -108,7 +108,6 @@ public class EvaluationTool {
 		Iterator<Integer> iteratorRow = rowEval.iterator();
 		while (iteratorRow.hasNext()) {
 			int row = iteratorRow.next();
-			//System.out.println("La row: " + row + " e nella mappa");
 			if ((rowSymbols[row][0] + rowSymbols[row][1]) < n){
 				countRowSequence(board, row);
 				if (myTurn && checkWin(myTurn))
@@ -275,9 +274,6 @@ public class EvaluationTool {
 							if (symCount == k - 1){
 								updateSopen(currP, symCount);
 							}
-							if (symCount == k - 2 && prevFree >= 2){
-								updateSopen(currP, symCount);
-							}
 							//reduce the symbols by symCount
 							prevFree = 0;
 						}
@@ -310,12 +306,6 @@ public class EvaluationTool {
 						//rimuovi un simbolo
 						prevFree = 0;
 					}
-					else if (symbCount == k - 2 && zeros_count == 2){
-						updateSopen(symb, symbCount);
-						z++;
-						//rimuovi un simbolo
-						prevFree = 0;
-					}
 					else{
 						if (zeros_count == 2){
 							z = j - 1;
@@ -331,8 +321,6 @@ public class EvaluationTool {
 					}
 				}
 				else {
-					if (symbCount == k - 2 && zeros_count == 1 && z - 1 >= 0 && board.isEqual(row, z-1, symb))
-						updateSopen(symb, symbCount);
 					z = j;
 					if (j - 2 >= 0 && board.isFree(row, j - 2)){
 						prevFree = 1;
@@ -404,9 +392,6 @@ public class EvaluationTool {
 							if (symCount == k - 1){
 								updateSopen(currP, symCount);
 							}
-							if (symCount == k - 2 && prevFree >= 2){
-								updateSopen(currP, symCount);
-							}
 							prevFree = 0;
 						}
 					}
@@ -436,11 +421,6 @@ public class EvaluationTool {
 						z++;
 						prevFree = 0;
 					}
-					else if (symbCount == k - 2 && zeros_count == 2){
-						updateSopen(symb, symbCount);
-						z++;
-						prevFree = 0;
-					}
 					else{
 						if (zeros_count == 2){
 							z = j - 1;
@@ -456,8 +436,6 @@ public class EvaluationTool {
 					}
 				}
 				else {
-					if (symbCount == k - 2 && zeros_count == 1 && z - 1 >= 0 && board.isEqual(z - 1, col, symb))
-						updateSopen(symb, symbCount);
 					z = j;
 					if (j - 2 >= 0 && board.isFree(j - 2, col)){
 						prevFree = 1;
@@ -528,9 +506,6 @@ public class EvaluationTool {
 							if (symCount == k - 1){
 								updateSopen(currP, symCount);
 							}
-							if (symCount == k - 2 && prevFree >= 2){
-								updateSopen(currP, symCount);
-							}
 							prevFree = 0;
 						}
 					}
@@ -560,11 +535,6 @@ public class EvaluationTool {
 						z++;
 						prevFree = 0;
 					}
-					else if (symbCount == k - 2 && zeros_count <= 2){
-						updateSopen(symb, symbCount);
-						z++;
-						prevFree = 0;
-					}
 					else{
 						if (zeros_count == 2){
 							z = j - 1;
@@ -580,8 +550,6 @@ public class EvaluationTool {
 					}
 				}
 				else {
-					if (symbCount == k - 2 && zeros_count == 1 && row + z - 1 >= 0 && col + z - 1 >= 0 && board.isEqual(row + z - 1, col + z - 1, symb))
-						updateSopen(symb, symbCount);
 					z = j;
 					if (row + j - 2 >= 0 && col + j - 2 >= 0 && board.isFree(row + j - 2, col + j - 2)){
 						prevFree = 1;
@@ -650,9 +618,6 @@ public class EvaluationTool {
 							if (symCount == k - 1){
 								updateSopen(currP, symCount);
 							}
-							if (symCount == k - 2 && prevFree >= 2){
-								updateSopen(currP, symCount);
-							}
 							prevFree = 0;
 						}
 					}
@@ -685,11 +650,6 @@ public class EvaluationTool {
 						z++;
 						prevFree = 0;
 					}
-					else if (symbCount == k - 2 && zeros_count <= 2){
-						updateSopen(symb, symbCount);
-						z++;
-						prevFree = 0;
-					}
 					else{
 						if (zeros_count == 2){
 							z = j - 1;
@@ -705,8 +665,6 @@ public class EvaluationTool {
 					}
 				}
 				else {
-					if (symbCount == k - 2 && zeros_count == 1 && row + z - 1 >= 0 && col - z + 1 < board.N && board.isEqual(row + z - 1, col - z + 1, symb))
-						updateSopen(symb, symbCount);
 					z = j;
 					if (row + j - 2 >= 0 && col - j + 2 < board.N && board.isFree(row + j - 2, col - j + 2)){
 						prevFree = 1;
@@ -851,11 +809,14 @@ public class EvaluationTool {
 	
 
 	protected void updateOpen(int symCount, MNKCellState P){
-		if (P == mySymb)
+		if (P == mySymb){
 			openSeq[symCount - minSeq][0]++;
-		else
-			openSeq[symCount-minSeq][1]++;
-		
+			//System.out.println("Aggiungo una sequenza da simboli per me: " + symCount);
+		}
+		else{
+			openSeq[symCount - minSeq][1]++;
+			//System.out.println("Aggiungo una sequenza da simboli per lui: " + symCount);
+		}
 	}
 	
 	protected void updateSopen(MNKCellState P, int symb){
@@ -897,7 +858,10 @@ public class EvaluationTool {
 		sopenThreatEval[1][1] = (int)(openThreatEval[MAX_THREATS - 2][1] / 4.3);
 		sopenThreatEval[1][0] = sopenThreatEval[1][1] / 15;
 		
-		/*
+		int tmp;
+		tmp = openThreatEval[MAX_THREATS - 2][1];
+		openThreatEval[MAX_THREATS - 2][1] = sopenThreatEval[0][1];
+		sopenThreatEval[0][1] = tmp;
 		System.out.println("K = " + k);
 		System.out.println("OPEN THREATS EVAL");
 		int c = 1;
@@ -909,7 +873,7 @@ public class EvaluationTool {
 	
 		System.out.println("k - 1 eval mia: " + sopenThreatEval[0][0] + " sue: " + sopenThreatEval[0][1]);
 		System.out.println("k - 2 eval mia: " + sopenThreatEval[1][0] + " sue: " + sopenThreatEval[1][1]);
-		*/
+	
 	}
 	
 	public void symbDiag(int row, int col, int player, int delta){
@@ -945,12 +909,11 @@ public class EvaluationTool {
 			//System.out.println("Minacce k - " + c + " mie: " + openSeq[i][0] + " sue: " + openSeq[i][1]);
 			c--;
 		}
-		/*
-		System.out.println("K - 1 semiopen, mie: " + sopenSeq[0][0] + " sue: " + sopenSeq[0][1]);
-		System.out.println("K - 2 semiopen, mie: " + sopenSeq[1][0] + " sue: " + sopenSeq[1][1]);
-		*/
+		
+		//System.out.println("K - 1 semiopen, mie: " + sopenSeq[0][0] + " sue: " + sopenSeq[0][1]);
+		//System.out.println("K - 2 semiopen, mie: " + sopenSeq[1][0] + " sue: " + sopenSeq[1][1]);
+		
 		eval = eval + sopenSeq[0][0]*sopenThreatEval[0][0] - sopenSeq[0][1]*sopenThreatEval[0][1];
-		eval = eval + sopenSeq[1][0]*sopenThreatEval[1][0] - sopenSeq[1][1]*sopenThreatEval[1][1];
 		return eval;
 	}
 }
