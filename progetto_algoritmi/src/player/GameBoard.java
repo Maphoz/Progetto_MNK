@@ -27,7 +27,7 @@ public class GameBoard extends MNKBoard{
 		return IC.toArray(new MNKCell[IC.size()]);
 	}
 
-    private boolean isFree(int i, int j){
+    public boolean isFree(int i, int j){
         return B[i][j] == MNKCellState.FREE;
     }
     
@@ -69,6 +69,10 @@ public class GameBoard extends MNKBoard{
             }
     }
 
+    public boolean isEqual(int i, int j, MNKCellState P){
+        return  (B[i][j] == P);
+    }
+    
     private boolean inBounds(int i, int j){
         return (i >= 0 && i < M && j >= 0 && j < N);
     }

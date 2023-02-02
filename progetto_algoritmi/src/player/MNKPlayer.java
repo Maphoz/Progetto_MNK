@@ -173,7 +173,7 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 
 	@Override
 	public String playerName() {
-		return "Giusama";
+		return "GiusamaHaze";
 	}
 	
 	protected MNKCell center(MNKCell[] FC, int lenght, int M, int N) { //la prima mossa la metti sempre al centro
