@@ -30,7 +30,6 @@ public class killer_heuristic {
 
 	public killer_heuristic(int M, int N) {
 		slot = fix_slot_number(M,N);
-		System.out.println("lo slot è " + slot);
 		KM_default = new MNKCell (-5,5);
 		max_distance_from_root = M*N;
 		size = new int [max_distance_from_root];
@@ -43,11 +42,11 @@ public class killer_heuristic {
 		}
 	}
 	protected int fix_slot_number(int M, int N) {
-		if(M*N<=25)        //5 5
+		if(M*N<=16)        //5 5
 			return 2;
-		else if(M*N<=81)     //9 9
+		else if(M*N<=40)     //9 9
 			return 3;
-		else if (M*N<=400)   //20 20
+		else if (M*N<=65)   //20 20
 			return 4;
 		else 
 			return 5;

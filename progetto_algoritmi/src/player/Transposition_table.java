@@ -79,11 +79,13 @@ public class Transposition_table {
 	//LOWBIAS
 	protected int lowbias32(int x)
 	{
-	    x ^= x >>> 16;
-	    x *= 0x7feb352d;
-	    x ^= x >>> 15;
-	    x *= 0x846ca68b;
-	    x ^= x >>> 16;
+	    x ^= x >> 17;
+	    x *= 0xed5ad4bb;
+	    x ^= x >> 11;
+	    x *= 0xac4c1b51;
+	    x ^= x >> 15;
+	    x *= 0x31848bab;
+	    x ^= x >> 14;
 	    return x;
 	}
 
