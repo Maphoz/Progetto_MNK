@@ -53,15 +53,12 @@ public class alphabeta{
 		
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
-			//System.out.println("ho preso lo score!" + history.i + " " + history.j);
+			//System.out.println("ho preso lo score!" + history.i + " " + history.j + " a depth " + depth);
 
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
 			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell in prima posizione nell'array Killer
-			if (history.incompleteLevel)
-				depth = history.depth - 1;
-			else
-				depth = history.depth;
+			depth = history.depth;
 		}
 		//System.out.println("parto dalla depth " + depth);
 		
@@ -87,7 +84,7 @@ public class alphabeta{
 				eval.addSymbol(d.i, d.j, true);
 				key = TT.generate_key(key, d.i, d.j, MNKPlayer.ourState);
 				int value = min(board, alpha, beta, depth, distance_from_root + 1, eval, true, key);
-				//System.out.println("La mossa: " + d.i + " " + d.j + " ha dato valutazione: " + value);
+				//System.out.println("La mossa: " + d.i + " " + d.j);
 				key = TT.undo_key(key, d.i, d.j, MNKPlayer.ourState);
 				if (outOfTime()) {
 					board.unmarkCell();								//remove the cell and iterate again
@@ -116,7 +113,7 @@ public class alphabeta{
 			depth += depth_span;
 		}
 
-	
+		//System.out.println("Ho finito l'iterative a depth: " + depth);
 		return selected_cell;
 	}
 	
@@ -125,8 +122,14 @@ public class alphabeta{
 	//ALPHABETA CON TT E KILLER
 	protected int max(GameBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval, boolean saveNode, long key) {
 		if(depth==0) {
-			int evaluation = eval.evaluation(board, true);
-			return evaluation;
+			if (TT.gain_score(key) != TT.ScoreNotFound){
+				return TT.gain_score(key);
+			}
+			else{
+				int evaluation = eval.evaluation(board, true);
+				TT.save_data(evaluation, key, 0, 0, 0, false, 0);
+				return evaluation;
+			}
 		}
 		
 		MNKCell[] FC = board.getInterestingCells();
@@ -155,6 +158,8 @@ public class alphabeta{
 			int value = min(board, alpha, beta, depth - 1, distance_from_root + 1, eval, false, key);			//else recursive call and compare the evaluations
 			key = TT.undo_key(key, d.i, d.j, MNKPlayer.ourState);
 			if (outOfTime()) {
+				//if (saveNode && depth >= 3 && alpha != eval.MAX_EVALUATION)
+				//	TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, true, distance_from_root);
 				board.unmarkCell();
 				eval.removeSymbol(d.i, d.j, true);
 				break;
@@ -165,7 +170,7 @@ public class alphabeta{
 			}
 			if (saveNode && i == lenght-1){
 				if (depth >= 3) {
-					TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
+					TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, true, distance_from_root);
 				}
 			}
 			board.unmarkCell();
@@ -178,7 +183,7 @@ public class alphabeta{
 					killer.change_weight(d, - 1, distance_from_root);  //mossa buona 
 				}
 				if (saveNode && depth >= 3) {
-	                TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, false, distance_from_root);
+	                TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, true, distance_from_root);
 				}
 				break;
 			}
@@ -195,8 +200,14 @@ public class alphabeta{
 	
 	protected int min(GameBoard board, int alpha, int beta, int depth, int distance_from_root, EvaluationTool eval, boolean saveNode, long key) {
 		if(depth==0) {
-			int evaluation = eval.evaluation(board, false);
-			return evaluation;
+			if (TT.gain_score(key) != TT.ScoreNotFound){
+				return TT.gain_score(key);
+			}
+			else{
+				int evaluation = eval.evaluation(board, false);
+				TT.save_data(evaluation, key, 0, 0, 0, false, 0);
+				return evaluation;
+			}
 		}
 		
 		MNKCell[] FC = board.getInterestingCells();
@@ -223,6 +234,9 @@ public class alphabeta{
 				return 0;
 			}
 			int value = max(board, alpha, beta, depth - 1, distance_from_root + 1, eval, saveNode, key);
+			//if (saveNode){
+			//	System.out.println("La mossa: " + d.i + " " + d.j + " ha dato valutazione: " + value);
+			//}
 			key = TT.undo_key(key, d.i, d.j, MNKPlayer.enemyState);
 			if (outOfTime()) {
 				board.unmarkCell();
@@ -247,7 +261,6 @@ public class alphabeta{
 				if(killer.is_a_KM(d, distance_from_root)) {
 					killer.change_weight(d, + 1, distance_from_root);       //la mossa era scarsotta perchè non ha fatto cut off quindi abbassiamo la priorità
 				}
-				
 			}
 		}
 		return beta;

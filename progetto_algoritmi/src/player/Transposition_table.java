@@ -37,7 +37,7 @@ public class Transposition_table {
 		
 		hash_size = (int)Math.pow(2,22);  //dimensione della tabella hash 
 	
-		ScoreNotFound = -10; //indica se quando Osama controlla se e' presente nella transposition_hash lo score , non lo trova
+		ScoreNotFound = 50000; //indica se quando Osama controlla se e' presente nella transposition_hash lo score , non lo trova
 		transposition_hash = new transposition_hash_cell[hash_size];
 		for(int i=0; i<hash_size; i++){
 			transposition_hash_cell t = new transposition_hash_cell(-2);
@@ -107,22 +107,52 @@ public class Transposition_table {
 			mem = new memory(ScoreNotFound, -1, -1, -1, false, -1);
 			return mem;
 		}
-}
+	}
+
+	public int gain_score (long key){
+		int transposition_table_index = Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
+
+		if(transposition_hash[transposition_table_index].score != -2 && transposition_hash[transposition_table_index].mask_key == (int)key && !transposition_hash[transposition_table_index].flag){
+			return transposition_hash[transposition_table_index].score;
+		}
+		else
+			return ScoreNotFound;
+	}
 
 	//Osama genera la chiave, controlla se e' presente nella tabella tramite gain_score, se non c'e' fa una evaluation e poi salva lo score con save_data
-	public void save_data(int score, long key, int depth, int i, int j, boolean flag, int distance_from_root){
+	public void save_data(int score, long key, int depth, int i, int j, boolean saveMove, int distance_from_root){
 		int transposition_table_index =  Math.abs((int) (lowbias32((int)key) % (hash_size - 1)));
 
+		/* 
 		if(transposition_hash[transposition_table_index].score == -2 || transposition_hash[transposition_table_index].depth<(short)depth) {  //replace in base a cella vuota o score scarso gi� presente nella TT
 			transposition_hash[transposition_table_index].score=(short)score;
 			transposition_hash[transposition_table_index].depth=(short)depth;
 			transposition_hash[transposition_table_index].mask_key= (int)key; 
 			transposition_hash[transposition_table_index].i = (byte)i;
 			transposition_hash[transposition_table_index].j = (byte)j;
-			transposition_hash[transposition_table_index].flag = flag;
+			transposition_hash[transposition_table_index].flag = saveMove;
 			transposition_hash[transposition_table_index].distance_from_root = (short)distance_from_root;
 		}
-		
+		*/
+
+		if (saveMove && transposition_hash[transposition_table_index].depth<(short)depth){
+			transposition_hash[transposition_table_index].score=(short)score;
+			transposition_hash[transposition_table_index].depth=(short)depth;
+			transposition_hash[transposition_table_index].mask_key= (int)key; 
+			transposition_hash[transposition_table_index].i = (byte)i;
+			transposition_hash[transposition_table_index].j = (byte)j;
+			transposition_hash[transposition_table_index].flag = saveMove;
+			transposition_hash[transposition_table_index].distance_from_root = (short)distance_from_root;
+		}
+		else if (!saveMove && transposition_hash[transposition_table_index].score == -2){
+			transposition_hash[transposition_table_index].score=(short)score;
+			transposition_hash[transposition_table_index].depth=(short)0;
+			transposition_hash[transposition_table_index].mask_key= (int)key; 
+			transposition_hash[transposition_table_index].i = -1;
+			transposition_hash[transposition_table_index].j = -1;
+			transposition_hash[transposition_table_index].flag = false;
+			transposition_hash[transposition_table_index].distance_from_root = (short)-1;
+		}
 	}
 	
 	public boolean are_transpositions(MNKCellState[][] A, MNKCellState[][] B, int M, int N){

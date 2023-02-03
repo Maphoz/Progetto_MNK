@@ -108,6 +108,7 @@ public class EvaluationTool {
 		Iterator<Integer> iteratorRow = rowEval.iterator();
 		while (iteratorRow.hasNext()) {
 			int row = iteratorRow.next();
+			//System.out.println("La row: " + row + " e nella mappa");
 			if ((rowSymbols[row][0] + rowSymbols[row][1]) < n){
 				countRowSequence(board, row);
 				if (myTurn && checkWin(myTurn))
@@ -250,7 +251,7 @@ public class EvaluationTool {
 									sucFree++;
 								}
 
-								if (prevFree + symCount + sucFree == k){
+								if (prevFree + symCount + sucFree >= k){
 									updateOpen(symCount, currP);
 								}
 								if (symCount == k - 1){	
@@ -274,6 +275,9 @@ public class EvaluationTool {
 							if (symCount == k - 1){
 								updateSopen(currP, symCount);
 							}
+							//if (symCount == k - 2 && prevFree >= 2){
+							//	updateSopen(currP, symCount);
+							//}
 							//reduce the symbols by symCount
 							prevFree = 0;
 						}
@@ -282,8 +286,7 @@ public class EvaluationTool {
 			}
 			else{
 				MNKCellState symb = board.cellState(row,z);
-				int future_index = z + 1;
-				int j = future_index;
+				int j = z + 1;
 				int zeros_count = 0;
 				boolean diff_symb = false;
 				int symbCount = 1;
@@ -300,12 +303,18 @@ public class EvaluationTool {
 					j++;
 				}
 				if (!diff_symb) {
-					if (symbCount == k - 1 && zeros_count <= 1){
+					if (symbCount == k - 1 && (zeros_count > 0 || (j < board.N && board.isFree(row, j)))){
 						updateSopen(symb, symbCount);
 						z++;
 						//rimuovi un simbolo
 						prevFree = 0;
 					}
+					//else if (symbCount == k - 2 && zeros_count == 2){
+					//	updateSopen(symb, symbCount);
+					//	z++;
+					//	//rimuovi un simbolo
+					//	prevFree = 0;
+					//}
 					else{
 						if (zeros_count == 2){
 							z = j - 1;
@@ -321,8 +330,10 @@ public class EvaluationTool {
 					}
 				}
 				else {
+					//if (symbCount == k - 2 && zeros_count == 1 && z - 1 >= 0 && board.isEqual(row, z-1, symb))
+					//	updateSopen(symb, symbCount);
 					z = j;
-					if (j - 2 >= 0 && board.isFree(row, j - 2)){
+					if (j - 1 >= 0 && board.isFree(row, j - 1)){
 						prevFree = 1;
 					}
 					else
@@ -370,7 +381,7 @@ public class EvaluationTool {
 									sucFree++;
 								}
 
-								if (prevFree + symCount + sucFree == k){
+								if (prevFree + symCount + sucFree >= k){
 									updateOpen(symCount, currP);
 								}
 								if (symCount == k - 1){	
@@ -416,7 +427,7 @@ public class EvaluationTool {
 					j++;
 				}
 				if (!diff_symb) {
-					if (symbCount == k - 1 && zeros_count <= 1){
+					if (symbCount == k - 1  && (zeros_count > 0 || (j < board.M && board.isFree(j, col)))){
 						updateSopen(symb, symbCount);
 						z++;
 						prevFree = 0;
@@ -484,7 +495,7 @@ public class EvaluationTool {
 									sucFree++;
 								}
 
-								if (prevFree + symCount + sucFree == k){
+								if (prevFree + symCount + sucFree >= k){
 									updateOpen(symCount, currP);
 								}
 								if (symCount == k - 1){	
@@ -530,7 +541,7 @@ public class EvaluationTool {
 					j++;
 				}
 				if (!diff_symb) {
-					if (symbCount == k - 1 && zeros_count <= 1){
+					if (symbCount == k - 1  && (zeros_count > 0 || (row + j < board.M && col + j < board.N && board.isFree(row + j, col + j)))){
 						updateSopen(symb, symbCount);
 						z++;
 						prevFree = 0;
@@ -596,7 +607,7 @@ public class EvaluationTool {
 									sucFree++;
 								}
 
-								if (prevFree + symCount + sucFree == k){
+								if (prevFree + symCount + sucFree >= k){
 									updateOpen(symCount, currP);
 								}
 								if (symCount == k - 1){	
@@ -645,7 +656,7 @@ public class EvaluationTool {
 				}
 				//System.out.println("Errore avviene dopo il primo while");
 				if (!diff_symb) {
-					if (symbCount == k - 1 && zeros_count <= 1){
+					if (symbCount == k - 1  && (zeros_count > 0 || (row + j < board.M && col - j >= 0 && board.isFree(row + j, col - j)))){
 						updateSopen(symb, symbCount);
 						z++;
 						prevFree = 0;
@@ -800,7 +811,8 @@ public class EvaluationTool {
 	
 	
 	//if a player has k-1 threats and it's his turn, he will convert to a win
-	protected boolean checkWin(boolean myTurn) {
+	protected boolean checkWin(boolean myTurn) { 
+		//return false;
 		if (myTurn)
 			return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
 		else
@@ -820,7 +832,7 @@ public class EvaluationTool {
 	}
 	
 	protected void updateSopen(MNKCellState P, int symb){
-		if (P == enemySymb)
+		if (P == mySymb)
 			sopenSeq[k - symb - 1][0]++;
 		else
 			sopenSeq[k - symb - 1][1]++;
@@ -862,18 +874,17 @@ public class EvaluationTool {
 		tmp = openThreatEval[MAX_THREATS - 2][1];
 		openThreatEval[MAX_THREATS - 2][1] = sopenThreatEval[0][1];
 		sopenThreatEval[0][1] = tmp;
-		System.out.println("K = " + k);
-		System.out.println("OPEN THREATS EVAL");
+		//System.out.println("K = " + k);
+		//System.out.println("OPEN THREATS EVAL");
 		int c = 1;
 		for (int i = k - minSeq - 1; i >= 0; i--){
-			System.out.println("Sequenze k - " + c + " , mia eval " + openThreatEval[i][0] + " sua eval " + openThreatEval[i][1]);
-			System.out.println(" ");
+			//System.out.println("Sequenze k - " + c + " , mia eval " + openThreatEval[i][0] + " sua eval " + openThreatEval[i][1]);
+			//System.out.println(" ");
 			c++;
 		}
 	
-		System.out.println("k - 1 eval mia: " + sopenThreatEval[0][0] + " sue: " + sopenThreatEval[0][1]);
-		System.out.println("k - 2 eval mia: " + sopenThreatEval[1][0] + " sue: " + sopenThreatEval[1][1]);
-	
+		//System.out.println("k - 1 eval mia: " + sopenThreatEval[0][0] + " sue: " + sopenThreatEval[0][1]);
+		//System.out.println("k - 2 eval mia: " + sopenThreatEval[1][0] + " sue: " + sopenThreatEval[1][1]);
 	}
 	
 	public void symbDiag(int row, int col, int player, int delta){
@@ -895,11 +906,11 @@ public class EvaluationTool {
 
 	//computes the number of threats * evaluation
 	protected int threatCalculation(boolean myTurn) {
-		if (myTurn && (openSeq[MAX_THREATS - 1][1] > 0 || sopenSeq[0][1] > 1) && (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] == 0))
-			return MIN_EVALUATION;
-		
-		if (!myTurn && (openSeq[MAX_THREATS - 1][0] > 0 || sopenSeq[0][0] > 1) && (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] == 0))
-			return MAX_EVALUATION;
+		//if (myTurn && (openSeq[MAX_THREATS - 1][1] > 0 || sopenSeq[0][1] > 1) && (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] == 0))
+		//	return MIN_EVALUATION;
+		//
+		//if (!myTurn && (openSeq[MAX_THREATS - 1][0] > 0 || sopenSeq[0][0] > 1) && (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] == 0))
+		//	return MAX_EVALUATION;
 
 		int eval = 0;
 		//valuto i threat open
