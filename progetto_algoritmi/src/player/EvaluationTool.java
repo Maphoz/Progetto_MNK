@@ -17,6 +17,9 @@ public class EvaluationTool {
 	public int MAX_EVALUATION = 32767;				//if we win
 	public int MIN_EVALUATION = -32768;				//if enemy player win
 	
+	public int HIGH_EVALUATION = 15000;
+	public int LOW_EVALUATION = -15000;
+	
 	//maps that store how many symbols there are in each row/column to evaluate a board
 	//saves time if n symbols < k-2
 	public int rowSymbols[][];
@@ -117,9 +120,9 @@ public class EvaluationTool {
 			if ((rowSymbols[row][0] + rowSymbols[row][1]) < n){
 				countRowSequence(board, row);
 				if (myTurn && checkWin(myTurn))
-					return MAX_EVALUATION;
+					return HIGH_EVALUATION;
 				if (!myTurn && checkWin(myTurn))
-					return MIN_EVALUATION;
+					return LOW_EVALUATION;
 			}
 		}
 
@@ -131,9 +134,9 @@ public class EvaluationTool {
 			if ((colSymbols[col][0] + colSymbols[col][1]) < m){
 				countColSequence(board, col);
 				if (myTurn && checkWin(myTurn))
-					return MAX_EVALUATION;
+					return HIGH_EVALUATION;
 				if (!myTurn && checkWin(myTurn))
-					return MIN_EVALUATION;
+					return LOW_EVALUATION;
 			}
 		}
 		
@@ -144,10 +147,10 @@ public class EvaluationTool {
 					if (diagRowSymb[i][0] + diagRowSymb[i][1] < Math.min(m, n - i) && ( diagRowSymb[i][0] >= minSeq || diagRowSymb[i][1] >= minSeq)){
 						countDiagSequence(board, 0, i);
 						if (myTurn && checkWin(myTurn)) {
-							return MAX_EVALUATION;
+							return HIGH_EVALUATION;
 						}
 						if (!myTurn && checkWin(myTurn)) {
-							return MIN_EVALUATION;
+							return LOW_EVALUATION;
 						}
 					}
 					break;
@@ -156,10 +159,10 @@ public class EvaluationTool {
 					if (antiDiagRowSymb[i][0] + antiDiagRowSymb[i][1] < Math.min(m, i + 1) && ( antiDiagRowSymb[i][0] >= minSeq || antiDiagRowSymb[i][1] >= minSeq)){
 						countAntiDiagSequence(board, 0, i);
 						if (myTurn && checkWin(myTurn)) {
-							return MAX_EVALUATION;
+							return HIGH_EVALUATION;
 						}
 						if (!myTurn && checkWin(myTurn)) {
-							return MIN_EVALUATION;
+							return LOW_EVALUATION;
 						}
 					}
 					break;
@@ -170,10 +173,10 @@ public class EvaluationTool {
 					if (antiDiagRowSymb[i][0] + antiDiagRowSymb[i][1] < Math.min(m, i + 1) && ( antiDiagRowSymb[i][0] >= minSeq || antiDiagRowSymb[i][1] >= minSeq))
 						countAntiDiagSequence(board, 0, i);
 					if (myTurn && checkWin(myTurn)) {
-						return MAX_EVALUATION;
+						return HIGH_EVALUATION;
 					}
 					if (!myTurn && checkWin(myTurn)) {
-						return MIN_EVALUATION;
+						return LOW_EVALUATION;
 					}
 					break;
 				}
@@ -187,19 +190,19 @@ public class EvaluationTool {
 			if (diagColSymb[i][0] + diagColSymb[i][1] < m - i && (diagColSymb[i][0] >= minSeq || diagColSymb[i][1] >= minSeq)){
 				countDiagSequence(board, i, 0);
 				if (myTurn && checkWin(myTurn)) {
-					return MAX_EVALUATION;
+					return HIGH_EVALUATION;
 				}
 				if (!myTurn && checkWin(myTurn)) {
-					return MIN_EVALUATION;
+					return LOW_EVALUATION;
 				}
 			}
 			if (antiDiagColSymb[i][0] + antiDiagColSymb[i][1] < m - i && (antiDiagColSymb[i][0] >= minSeq || antiDiagColSymb[i][1] >= minSeq)){
 				countAntiDiagSequence(board, i, n - 1);
 				if (myTurn && checkWin(myTurn)) {
-					return MAX_EVALUATION;
+					return HIGH_EVALUATION;
 				}
 				if (!myTurn && checkWin(myTurn)) {
-					return MIN_EVALUATION;
+					return LOW_EVALUATION;
 				}
 			}
 			i++;
@@ -817,11 +820,11 @@ public class EvaluationTool {
 	
 	//if a player has k-1 threats and it's his turn, he will convert to a win
 	protected boolean checkWin(boolean myTurn) { 
-		return false;
-		//if (myTurn)
-		//	return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
-		//else
-		//	return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
+		//return false;
+		if (myTurn)
+			return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
+		else
+			return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
 	}
 	
 
