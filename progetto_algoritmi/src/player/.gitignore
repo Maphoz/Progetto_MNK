@@ -14,3 +14,9 @@
 /memory.class
 /killer_heuristic$killer_cell.class
 /GameBoard.class
+/ScoreMove.class
+/MergeSort.class
+/QuickSort.class
+/killer_cell.class
+/killer_heuristic$Bar.class
+/killer_heuristic$QuickSort.class

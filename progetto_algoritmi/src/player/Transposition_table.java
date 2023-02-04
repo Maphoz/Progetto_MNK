@@ -1,5 +1,6 @@
 package player;
 import java.util.Random;
+
 import mnkgame.MNKCellState;
 import player.memory;
 

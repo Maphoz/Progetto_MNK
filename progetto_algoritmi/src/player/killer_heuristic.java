@@ -2,13 +2,60 @@ package player;
 
 
 import mnkgame.MNKCell;
-
+import player.ScoreMove;
 
 
 
 
 
 public class killer_heuristic {
+	
+	 public static class QuickSort {
+		 		public QuickSort() {
+		 			
+		 		}
+			    static int partition(ScoreMove arr[], int low, int high)
+			    {
+			        int pivot = arr[high].score;
+			        int i = (low-1); // index of smaller element
+			        for (int j=low; j<high; j++)
+			        {
+			            // If current element is smaller than or
+			            // equal to pivot
+			            if (arr[j].score <= pivot)
+			            {
+			                i++;
+			 
+			                // swap arr[i] and arr[j]
+			                ScoreMove temp = arr[i];
+			                arr[i] = arr[j];
+			                arr[j] = temp;
+			            }
+			        }
+			 
+			        // swap arr[i+1] and arr[high] (or pivot)
+			        ScoreMove temp = arr[i+1];
+			        arr[i+1] = arr[high];
+			        arr[high] = temp;
+			 
+			        return i+1;
+			    }
+			    static void sort(ScoreMove arr[], int low, int high)
+			    {
+			        if (low < high)
+			        {
+			            /* pi is partitioning index, arr[pi] is
+			              now at right place */
+			            int pi = partition(arr, low, high);
+			 
+			            // Recursively sort elements before
+			            // partition and after partition
+			            sort(arr, low, pi-1);
+			            sort(arr, pi+1, high);
+			        }
+			    }
+			}	
+	
 	
 	protected class killer_cell {
 		protected int weight;
@@ -125,11 +172,11 @@ public class killer_heuristic {
 		}
 		
 	}
-	
-	public void move_ordering(MNKCell[] FC, int lenght, int distance_from_root) {	
+	/*
+	//ci creiamo un array con un indice e uno score e riordiniamo in base allo score
+	public void move_ordering(MNKCell[] FC, ScoreMove s[], int distance_from_root) {	
 		
-		if(lenght<size[distance_from_root])
-			return;
+		
 		int counter = 0;
 		for(int j=0; j<size[distance_from_root]; j++) {
 			for(int i=counter; i<lenght; i++) {
@@ -140,10 +187,36 @@ public class killer_heuristic {
 			}
 		}
 	}
+	*/
+public MNKCell[] move_ordering(MNKCell[] FC, ScoreMove s[], int distance_from_root) {
+		
+		int max_index = Math.min(10,FC.length);
+		MNKCell [] newFC = new MNKCell[max_index];
+		int counter = 0;
+		for(int j=0; j<size[distance_from_root]; j++) {
+			for(int i=0; i<FC.length; i++) {
+					if(myEqual(FC[i],killerMoves[distance_from_root][j].killer_move)) {
+						newFC[counter] = FC[i];
+						counter ++;
+						break;
+					}		
+			}
+		}
+		QuickSort.sort(s, 0, s.length);
+		int it = -1;
+		for(int i = counter; i<max_index; i++) {
+			while(it<FC.length) {
+				it ++;
+				if(!is_a_KM(FC[s[it].index], distance_from_root)) {
+					newFC[i] = FC[s[it].index];
+					break;
+				}
+			}	
+		}
+		return newFC;
+	}
 	
-	
-	
-	
+	/*
 	private void swapFC(MNKCell FC[], int index_a, int index_b) {
 		if(index_a == index_b)
 			return;
@@ -151,6 +224,7 @@ public class killer_heuristic {
 		FC[index_a] = FC[index_b];
 		FC[index_b] = tmp;
 	}
+	*/
 	private void swapKillerCell(killer_cell killerMoves[], int index_a, int index_b, boolean swapweight) {
 		if(index_a == index_b)
 			return;

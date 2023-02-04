@@ -36,3 +36,7 @@ MNKPlayerTester application:
 	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 player.MNKPlayer mnkgame.QuasiRandomPlayer -v -t 1 -r 10
 	
 	java -cp ".." mnkgame.MNKPlayerTester 5 5 4 player.MNKPlayer player.MNKPlayer -v -t 1 -r 10
+	
+	java -cp ".." mnkgame.MNKPlayerTester 10 10 5 player.MNKPlayer SufferingDoge.SufferingDoge -r 25
+	
+	

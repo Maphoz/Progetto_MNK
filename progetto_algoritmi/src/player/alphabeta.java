@@ -1,9 +1,10 @@
 package player;
 
 import mnkgame.MNKBoard;
+
 import java.util.*;
 
-
+import mnkgame.MNKCellState;
 import mnkgame.MNKCell;
 import mnkgame.MNKGameState;
 
@@ -41,20 +42,20 @@ public class alphabeta{
 		//System.out.println("Sono arrivato fino a depth: " + depth);
 	}
 	
-	public MNKCell iterativeDeepening(GameBoard board, MNKCell[] FC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
+	public MNKCell iterativeDeepening(GameBoard board, MNKCell[] IC, int maxDepth, Transposition_table TT, killer_heuristic killer,  int distance_from_root, EvaluationTool eval, long startTime, long key){
 		//this.TT = TT;
 		
 		this.key = key;
 		int depth = starting_depth;
 		startingTime = startTime;
 		
-		MNKCell previousBestCell = FC[0];
+		MNKCell previousBestCell = IC[0];
 		memory history;
 		
 		history = TT.gain_score(key, depth);
 		if (history.score != TT.ScoreNotFound) {
 			//System.out.println("ho preso lo score!" + history.i + " " + history.j + " a depth " + depth);
-
+			
 			MNKCell tempCell = new MNKCell (history.i, history.j);
 			previousBestCell = tempCell;
 			killer.insert_KM(previousBestCell, killer.get_first_KM_weight(distance_from_root), history.distance_from_root, true);          //inserisco la previousBestCell in prima posizione nell'array Killer
@@ -63,8 +64,7 @@ public class alphabeta{
 		//System.out.println("parto dalla depth " + depth);
 		
 		//pre-ordering moves through killer heuristic
-		int size = FC.length;
-		killer.move_ordering(FC, size, distance_from_root);
+		MNKCell[] FC = killer.move_ordering(IC,get_ScoreMove(IC, key, board, eval, true), distance_from_root);
 		//variables for behaving as the max node
 		MNKCell selected_cell = FC[0];
 		boolean previousEvaluated = false;
@@ -78,7 +78,7 @@ public class alphabeta{
 			selected_cell = FC[0];
 			int alpha = eval.MIN_EVALUATION;
 			int beta = eval.MAX_EVALUATION;
-			for (int i = 0; i< size; i++) {
+			for (int i = 0; i< FC.length; i++) {
 				MNKCell d = FC[i];
 				board.markCell(d.i, d.j);					
 				eval.addSymbol(d.i, d.j, true);
@@ -131,14 +131,15 @@ public class alphabeta{
 				return evaluation;
 			}
 		}
+		MNKCell[] IC = board.getInterestingCells();
 		
-		MNKCell[] FC = board.getInterestingCells();
-		int lenght = FC.length;
-		killer.move_ordering(FC, lenght, distance_from_root);
+		MNKCell[] FC = killer.move_ordering(IC,get_ScoreMove(IC, key, board, eval, true), distance_from_root);
+		
+		
 		
 		MNKGameState state;
 		MNKCell bestCell = FC[0];
-		for (int i = 0; i< lenght; i++) {
+		for (int i = 0; i< FC.length; i++) {
 			MNKCell d = FC[i];
 			state = board.markCell(d.i, d.j);	
 			eval.addSymbol(d.i, d.j, true);
@@ -168,7 +169,7 @@ public class alphabeta{
 				bestCell = d;
 				alpha = value;
 			}
-			if (saveNode && i == lenght-1){
+			if (saveNode && i == FC.length-1){
 				if (depth >= 3) {
 					TT.save_data(alpha, key, depth, bestCell.i, bestCell.j, true, distance_from_root);
 				}
@@ -210,13 +211,12 @@ public class alphabeta{
 			}
 		}
 		
-		MNKCell[] FC = board.getInterestingCells();
-		int lenght = FC.length;
-		killer.move_ordering(FC, lenght, distance_from_root);
+		MNKCell[] IC = board.getInterestingCells();
+		MNKCell[] FC = killer.move_ordering(IC,get_ScoreMove(IC, key, board, eval, false), distance_from_root);
 		MNKGameState state;
 		//int minValue = Integer.MAX_VALUE;
 		
-		for (int i = 0; i< lenght; i++) {
+		for (int i = 0; i< FC.length; i++) {
 			MNKCell d = FC[i];
 			state = board.markCell(d.i, d.j);
 			eval.addSymbol(d.i, d.j, false);
@@ -278,6 +278,55 @@ public class alphabeta{
 			return b;
 		else
 			return a;
+	}
+	protected ScoreMove[] get_ScoreMove(MNKCell IC[], long key, GameBoard board, EvaluationTool eval, boolean max) {
+		int mul;
+		MNKGameState cond;
+		MNKCellState cState; 
+		int ev;
+		if(max) {
+			cond = wCond;
+			ev = eval.MAX_EVALUATION;
+			cState = MNKPlayer.ourState;
+			mul = -1;
+		}
+		else {
+			cond = lCond;
+			ev = eval.MIN_EVALUATION;
+			cState = MNKPlayer.enemyState;
+			mul = 1;
+		}
+		ScoreMove[] s = new ScoreMove[IC.length];
+		for(int i = 0; i<IC.length; i++) {
+			MNKCell d = IC[i];
+			MNKGameState state = board.markCell(d.i, d.j);
+			eval.addSymbol(d.i, d.j, max);
+			key = TT.generate_key(key, d.i, d.j, cState);
+			if (state == cond) {
+				s[i].index = i;
+				s[i].score = mul * ev;
+			}
+			else if (state == MNKGameState.DRAW) {
+				s[i].index = i;
+				s[i].score = 0;
+			}
+			else if (TT.gain_score(key) != TT.ScoreNotFound){
+				s[i].index = i;
+				s[i].score = mul * TT.gain_score(key);
+			}
+			else{
+				int evaluation = eval.evaluation(board, !max);
+				TT.save_data(evaluation, key, 0, 0, 0, false, 0);
+				s[i].index = i;
+				s[i].score = mul * evaluation;
+				
+			}
+			key = TT.undo_key(key, d.i, d.j, cState);
+			board.unmarkCell();
+			eval.removeSymbol(d.i, d.j, max);
+		}
+		return s;
+		
 	}
 	//-----------
 	//ALPHABETA CON KILLER
