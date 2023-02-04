@@ -38,7 +38,7 @@ public class EvaluationTool {
 	//memorizes if i'm P1 or P2
 	MNKCellState mySymb;
 	MNKCellState enemySymb;
-	
+	//
 	//array that memorizes which cells give origin to interesting diagonals for evaluation
 	int diagRow[];
 	int diagCol[];
