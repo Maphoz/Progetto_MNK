@@ -298,6 +298,7 @@ public class alphabeta{
 		}
 		ScoreMove[] s = new ScoreMove[IC.length];
 		for(int i = 0; i<IC.length; i++) {
+			s[i] = new ScoreMove();
 			MNKCell d = IC[i];
 			MNKGameState state = board.markCell(d.i, d.j);
 			eval.addSymbol(d.i, d.j, max);

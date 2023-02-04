@@ -886,7 +886,7 @@ public class EvaluationTool {
 			openThreatEval[MAX_THREATS - 3][1] = sopenThreatEval[1][1];
 			sopenThreatEval[1][1] = tmp;
 		}
-		*/
+		*//*
 		//System.out.println("K = " + k);
 		//System.out.println("OPEN THREATS EVAL");
 		int c = 1;
@@ -895,7 +895,7 @@ public class EvaluationTool {
 			//System.out.println(" ");
 			c++;
 		}
-	
+	*/
 		//System.out.println("k - 1 eval mia: " + sopenThreatEval[0][0] + " sue: " + sopenThreatEval[0][1]);
 		//System.out.println("k - 2 eval mia: " + sopenThreatEval[1][0] + " sue: " + sopenThreatEval[1][1]);
 	}

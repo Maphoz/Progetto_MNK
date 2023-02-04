@@ -202,7 +202,7 @@ public MNKCell[] move_ordering(MNKCell[] FC, ScoreMove s[], int distance_from_ro
 					}		
 			}
 		}
-		QuickSort.sort(s, 0, s.length);
+		QuickSort.sort(s, 0, s.length-1);
 		int it = -1;
 		for(int i = counter; i<max_index; i++) {
 			while(it<FC.length) {
@@ -257,11 +257,17 @@ public MNKCell[] move_ordering(MNKCell[] FC, ScoreMove s[], int distance_from_ro
 	}
 	/*
 	//-------
-	public void printFC(MNKCell FC[], int lenght) {
+	public void printS(ScoreMove s[]) {
+		for(int i=0; i<s.length; i++) {
+			System.out.print(" " + s[i].score + " ");
+		}
+		System.out.println("___________________________");
+	}
+	
+	
+	public void printFC(MNKCell FC[]) {
 		System.out.println("printo FC");
-		if(lenght>5)
-			lenght = 5;
-		for(int i=0; i<lenght; i++) {
+		for(int i=0; i<FC.length; i++) {
 			System.out.print(" " + FC[i] + " ");
 		}
 		System.out.println("___________________________");
