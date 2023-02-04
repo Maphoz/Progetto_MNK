@@ -25,6 +25,7 @@ public class EvaluationTool {
 	public int antiDiagRowSymb[][];
 	int diagColSymb[][];
 	int antiDiagColSymb[][];
+	int divParameter;
 
 	public static int diagBoard[][];
 
@@ -47,6 +48,10 @@ public class EvaluationTool {
 		this.m = m;
 		this.n = n;
 
+		if (first)
+			divParameter = 12;
+		else
+			divParameter = 15;
 		//threats structure initialization
 		createThreatStructure();
 
@@ -812,11 +817,11 @@ public class EvaluationTool {
 	
 	//if a player has k-1 threats and it's his turn, he will convert to a win
 	protected boolean checkWin(boolean myTurn) { 
-		//return false;
-		if (myTurn)
-			return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
-		else
-			return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
+		return false;
+		//if (myTurn)
+		//	return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
+		//else
+		//	return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
 	}
 	
 
@@ -846,7 +851,7 @@ public class EvaluationTool {
 		openThreatEval = new int[MAX_THREATS][2];
 		sopenThreatEval = new int[2][2];
 	
-		double reducingCoefficient = 2.6;
+		double reducingCoefficient = 2.5;
 	
 		if (k <= 5){
 			openThreatEval[MAX_THREATS - 1][1] = 5020;
@@ -858,22 +863,30 @@ public class EvaluationTool {
 			openThreatEval[MAX_THREATS - 1][1] = (k/5 + 1) * 5020;
 		}
 		
-		openThreatEval[MAX_THREATS - 1][0] = (int)(openThreatEval[MAX_THREATS - 1][1] / 15);
+		openThreatEval[MAX_THREATS - 1][0] = (int)(openThreatEval[MAX_THREATS - 1][1] / divParameter);
 	
 		for (int i = (MAX_THREATS - 2); i >= 0; i--){
 			openThreatEval[i][1] = (int)(openThreatEval[i + 1][1] / reducingCoefficient);
-			openThreatEval[i][0] = openThreatEval[i][1] / 15;
+			openThreatEval[i][0] = (int)(openThreatEval[i][1] / divParameter);
 		}
 	
 		sopenThreatEval[0][1] = (int)(openThreatEval[MAX_THREATS - 1][1] / 4.3);
-		sopenThreatEval[0][0] = sopenThreatEval[0][1] / 15;
+		sopenThreatEval[0][0] = (int)(sopenThreatEval[0][1] / divParameter);
 		sopenThreatEval[1][1] = (int)(openThreatEval[MAX_THREATS - 2][1] / 4.3);
-		sopenThreatEval[1][0] = sopenThreatEval[1][1] / 15;
+		sopenThreatEval[1][0] = (int)(sopenThreatEval[1][1] / divParameter);
 		
 		int tmp;
 		tmp = openThreatEval[MAX_THREATS - 2][1];
 		openThreatEval[MAX_THREATS - 2][1] = sopenThreatEval[0][1];
 		sopenThreatEval[0][1] = tmp;
+
+		/* 
+		if (MAX_THREATS > 2){
+			tmp = openThreatEval[MAX_THREATS - 3][1];
+			openThreatEval[MAX_THREATS - 3][1] = sopenThreatEval[1][1];
+			sopenThreatEval[1][1] = tmp;
+		}
+		*/
 		//System.out.println("K = " + k);
 		//System.out.println("OPEN THREATS EVAL");
 		int c = 1;
