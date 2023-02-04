@@ -67,25 +67,33 @@ public class MNKPlayer implements mnkgame.MNKPlayer {
 		threatBoard = new int[M][N];
 		calculateCellThreats(K);
 
-		/* 
+		/*
+		myBoard.markCell(5,1);
+		eval.addSymbol(5,1, false);
 		myBoard.markCell(3,2);
-		eval.addSymbol(3, 2, false);
-		myBoard.markCell(2,1);
-		eval.addSymbol(2,1,true);
-		myBoard.markCell(2,2);
-		eval.addSymbol(2, 2, false);
-		myBoard.markCell(1,2);
-		eval.addSymbol(1,2, true);
-		myBoard.markCell(4,1);
-		eval.addSymbol(4, 1, false);
-		myBoard.markCell(2,3);
-		eval.addSymbol(2,3,true);
-		myBoard.markCell(4,2);
-		eval.addSymbol(4, 2, false);
-		myBoard.markCell(5,2);
-		eval.addSymbol(5,2,true);
+		eval.addSymbol(3,2,true);
+		myBoard.markCell(6,2);
+		eval.addSymbol(6,2, false);
 		myBoard.markCell(3,3);
-		eval.addSymbol(3, 3, false);
+		eval.addSymbol(3,3, true);
+		myBoard.markCell(5,3);
+		eval.addSymbol(5, 3, false);
+		myBoard.markCell(3,4);
+		eval.addSymbol(3,4,true);
+		myBoard.markCell(4,4);
+		eval.addSymbol(4,4, false);
+		myBoard.markCell(3,5);
+		eval.addSymbol(3,5,true);
+		myBoard.markCell(6,4);
+		eval.addSymbol(6,4, false);
+		myBoard.markCell(4,5);
+		eval.addSymbol(4,5,true);
+		myBoard.markCell(2,6);
+		eval.addSymbol(2,6, false);
+		myBoard.markCell(5,6);
+		eval.addSymbol(5,6,true);
+		myBoard.markCell(3,6);
+		eval.addSymbol(3,6, false);
 		System.out.println(eval.evaluation(myBoard, true));
 		*/
 		

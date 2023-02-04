@@ -817,11 +817,11 @@ public class EvaluationTool {
 	
 	//if a player has k-1 threats and it's his turn, he will convert to a win
 	protected boolean checkWin(boolean myTurn) { 
-		return false;
-		//if (myTurn)
-		//	return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
-		//else
-		//	return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
+		//return false;
+		if (myTurn)
+			return (openSeq[MAX_THREATS - 1][0] + sopenSeq[0][0] > 0);
+		else
+			return (openSeq[MAX_THREATS - 1][1] + sopenSeq[0][1] > 0);
 	}
 	
 
@@ -851,7 +851,7 @@ public class EvaluationTool {
 		openThreatEval = new int[MAX_THREATS][2];
 		sopenThreatEval = new int[2][2];
 	
-		double reducingCoefficient = 2.5;
+		double reducingCoefficient = 2.5;  //da cambiare
 	
 		if (k <= 5){
 			openThreatEval[MAX_THREATS - 1][1] = 5020;
@@ -867,7 +867,7 @@ public class EvaluationTool {
 	
 		for (int i = (MAX_THREATS - 2); i >= 0; i--){
 			openThreatEval[i][1] = (int)(openThreatEval[i + 1][1] / reducingCoefficient);
-			openThreatEval[i][0] = (int)(openThreatEval[i][1] / divParameter);
+			openThreatEval[i][0] = (int)(openThreatEval[i][1] / divParameter); //divParameter cambia in base al player
 		}
 	
 		sopenThreatEval[0][1] = (int)(openThreatEval[MAX_THREATS - 1][1] / 4.3);
